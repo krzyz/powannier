@@ -1,0 +1,7 @@
+build
+bin
+lib
+tmp
+docs/html
+docs/latex
+third-party
