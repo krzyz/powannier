@@ -9,3 +9,4 @@ RECURSIVE              = YES
 EXCLUDE_PATTERNS       = */test/* \
                          */third-party/* \
 USE_MDFILE_AS_MAINPAGE = @doxy_main_page@
+GENERATE_LATEX         = NO
