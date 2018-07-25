@@ -14,6 +14,7 @@ set(THIRD_PARTY_LIBDIR ${BASE_DIRECTORY}/third-party/lib)
 set(THIRD_PARTY_INCLUDEDIR ${BASE_DIRECTORY}/third-party/include)
 set(EXTERNAL_INSTALL_LOCATION ${BASE_DIRECTORY}/third-party)
 
+list(APPEND CMAKE_MODULE_PATH ${BASE_DIRECTORY})
 
 
 #configure_file(CMakeLists.txt.in download/CMakeLists.txt)

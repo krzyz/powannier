@@ -10,22 +10,17 @@
 #include "cubature.h"
 
 namespace POWannier {
+  /// @cond HIDDEN
   template<class T> struct is_complex : std::false_type {};
   template<class T> struct is_complex<std::complex<T>> : std::true_type {};
+  /// @endcond
 
   /**
-   * \brief An adapter implementing IntegrationInterface using Cubature C library.
+   * \brief An adapter implementing IntegrationInterface using Cubature C library (https://github.com/stevengj/cubature).
    */
 
   class CubatureIntegration : IntegrationInterface {
     public:
-      /*
-      template <class Function, class Vector>
-      static auto integrate(
-          Function&& function, Vector&& xmin, Vector&& xmax
-        ) -> decltype(function(xmin));
-        */
-
       template <class Function, class Vector, typename std::enable_if_t<is_complex<typename std::result_of<Function(Vector)>::type>{}>* = nullptr>
       static typename std::result_of<Function(Vector)>::type integrate(Function&& function, Vector xmin, Vector xmax) {
         using namespace std::literals;
@@ -66,43 +61,6 @@ namespace POWannier {
 
 
     private:
-      /*
-      // Last argument (dummy) is there only to provide Vector template parameter
-      template <class Function, class Vector, typename std::enable_if_t<is_complex<typename std::result_of<Function(Vector)>::type>{}>* = nullptr>
-      static typename std::result_of<Function(Vector)>::type integrationResult(Function&& function, int dim, double* xminArray, double* xmaxArray, Vector dummy) {
-        using namespace std::literals;
-
-        double resultReal, resultImag, err;
-
-        auto functionReal = [&] (Vector x) -> double {
-            return std::real(function(x));
-        };
-
-        auto functionImag = [&] (Vector x) -> double {
-            return std::imag(function(x));
-        };
-
-        hcubature(1, integrateForward<decltype(functionReal), Vector>, &functionReal, dim, xminArray, xmaxArray, 0, 1e-14, 0, ERROR_INDIVIDUAL, &resultReal, &err);
-        if (abs(resultReal) < 1e-14) {
-          resultReal = 0;
-        }
-        hcubature(1, integrateForward<decltype(functionImag), Vector>, &functionImag, dim, xminArray, xmaxArray, 0, 1e-14, 0, ERROR_INDIVIDUAL, &resultImag, &err);
-        if (abs(resultImag) < 1e-14) {
-          resultReal = 0;
-        }
-
-        return resultReal + resultImag * 1i;
-      }
-
-      template <class Function, class Vector, typename std::enable_if_t<!is_complex<typename std::result_of<Function(Vector)>::type>{}>* = nullptr>
-      static typename std::result_of<Function(Vector)>::type integrationResult(Function&& function, int dim, double* xminArray, double* xmaxArray, Vector dummy) {
-        double result, err;
-        hcubature(1, integrateForward<Function, Vector>, &function, dim, xminArray, xmaxArray, 0, 1e-15, 1e-04, ERROR_INDIVIDUAL, &result, &err);
-
-        return result;
-      }
-      */
-
       template <class Vector>
       static double* toArray(Vector x) {
         return x.data();
@@ -121,17 +79,6 @@ namespace POWannier {
       template <class Function, class Vector>
       static int integrateForward(unsigned ndim, const double* xArray, void* fdata, unsigned fdim, double* fval);
   };
-
-
-  /*
-  template <class Function, class Vector>
-  auto CubatureIntegration::integrate(Function&& function, Vector&& xmin, Vector&& xmax)
-    -> decltype(function(xmin)) {
-
-    return integrationResult(std::ref(function), dim, xminArray, xmaxArray, VectorNonRef());
-  }
-  */
-
 
   template <class Function, class Vector>
   int CubatureIntegration::integrateForward(unsigned ndim, const double* xArray, void* fdata, unsigned fdim, double* fval) {

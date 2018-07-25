@@ -28,6 +28,7 @@ file(GLOB HEADERS *.h)
 
 #add_subdirectory(${EXTERNAL_INSTALL_LOCATION}/cubature ${BASE_DIRECTORY}/build/third-party/cubature)
 
+#list(APPEND CMAKE_MODULE_PATH ${BASE_DIRECTORY})
 include(FetchContent)
 
 FetchContent_Declare(
@@ -48,7 +49,7 @@ set_target_properties(utility PROPERTIES LINKER_LANGUAGE CXX)
 target_link_libraries(utility cubature)
 
 target_include_directories(utility PUBLIC 
-  ${EXTERNAL_INSTALL_LOCATION}/cubature
+  ${cubature_SOURCE_DIR}
 )
 
 message(STATUS ${THIS_INCLUDEDIR})

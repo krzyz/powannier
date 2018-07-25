@@ -17,21 +17,21 @@ file(GLOB TEST_SOURCES *.cpp)
 include(FetchContent)
 
 FetchContent_Declare(
-  Catch
+  catch
   GIT_REPOSITORY https://github.com/catchorg/Catch2.git
 )
 
-FetchContent_GetProperties(Catch)
-if(NOT Catch_POPULATED)
-  FetchContent_Populate(cubature)
-  add_subdirectory(${Catch_SOURCE_DIR} ${Catch_BINARY_DIR})
+FetchContent_GetProperties(catch)
+if(NOT catch_POPULATED)
+  FetchContent_Populate(catch)
+  add_subdirectory(${catch_SOURCE_DIR} ${catch_BINARY_DIR})
 endif()
 
 
 add_executable(tests ${TEST_SOURCES})
 target_link_libraries(tests utility Catch2::Catch2)
 
-list(APPEND CMAKE_MODULE_PATH ${BASE_DIRECTORY}/third-party/Catch2/contrib)
+list(APPEND CMAKE_MODULE_PATH ${catch_SOURCE_DIR}/contrib)
 
 include(CTest)
 include(Catch)
