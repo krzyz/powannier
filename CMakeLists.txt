@@ -16,27 +16,12 @@ set(EXTERNAL_INSTALL_LOCATION ${BASE_DIRECTORY}/third-party)
 
 list(APPEND CMAKE_MODULE_PATH ${BASE_DIRECTORY})
 
-
-#configure_file(CMakeLists.txt.in download/CMakeLists.txt)
-
-#execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-#  RESULT_VARIABLE result
-#  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/download )
-#if(result)
-#  message(FATAL_ERROR "CMake step for googletest failed: ${result}")
-#endif()
-#execute_process(COMMAND ${CMAKE_COMMAND} --build .
-#  RESULT_VARIABLE result
-#  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/download )
-#if(result)
-#  message(FATAL_ERROR "Build step for googletest failed: ${result}")
-#endif()
-
 file(MAKE_DIRECTORY build)
 file(MAKE_DIRECTORY third-party)
 
 add_subdirectory(src/util)
 add_subdirectory(src/test)
+add_subdirectory(src/powannier)
 
 # Building documentation
 

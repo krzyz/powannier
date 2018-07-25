@@ -1,3 +1,7 @@
+#ifndef POWANNIER_ALIASES_H
+#define POWANNIER_ALIASES_H
+
+#include <armadillo>
 
 namespace POWannier {
   const double pi = arma::datum::pi;
@@ -9,3 +13,5 @@ namespace POWannier {
   using NPoint = arma::ivec;
   using FourierCoefficients = std::vector<std::pair<NPoint, arma::cx_double>>;
 }
+
+#endif

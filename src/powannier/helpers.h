@@ -1,28 +1,16 @@
+#ifndef POWANNIER_HELPERS_H
+#define POWANNIER_HELPERS_H
+
+#include <complex>
 #include <vector>
 
 #include "aliases.h"
 
-namespacePOWannier {
-  double chop(double number, double prec = 1e-15) {
-    if (abs(number) < prec)
-      number = 0;
-    return number;
-  }
+namespace POWannier {
+  double chop(double number, double prec = 1e-15);
+  std::complex<double> chop(std::complex<double> number, double prec = 1e-15);
 
-  std::vector<NPoint> nspace(int cutoff, int dim) {
-    std::vector<NPoint> nspace;
-    int number1D = 2 * cutoff + 1;
-    int numberAll = pow(number1D, dim);
-    for (int i = 0; i < numberAll; ++i) {
-      int ih = i;
-      Npoint n(dim);
-      for (int j = 0; j < dim; ++j) {
-        n(j) = ih % number1D - Cutoff;
-        ih /= number1D;
-      }
-      nspace.push_back(n);
-    }
-
-    return nspace;
-  }
+  std::vector<NPoint> nspace(int cutoff, int dim);
 }
+
+#endif

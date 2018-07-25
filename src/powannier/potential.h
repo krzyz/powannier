@@ -1,12 +1,16 @@
+#ifndef POWANNIER_POTENTIAL_H
+#define POWANNIER_POTENTIAL_H
+
 #include <armadillo>
 #include <exception>
 #include <utility>
 #include <vector>
 
+#include "../util/integrationinterface.h"
+#include "../util/cubatureintegration.h"
 #include "aliases.h"
 #include "helpers.h"
 
-template <class IntegrationProvider>
 namespace POWannier {
 
   template <class IntegrationProvider>
@@ -28,21 +32,23 @@ namespace POWannier {
       std::function<double(Position)> _potentialFunction;
 
       template<class Function>
-      calculateFourierCoefficients(
+      FourierCoefficients calculateFourierCoefficients(
           Function&& potentialFunction, int cutoff);
   };
 
   template <class IntegrationProvider>
   template <class Function>
-  PotentialT::PotentialT(
+  PotentialT<IntegrationProvider>::PotentialT(
       std::vector<Vector> latticeBasis,
       Function&& potentialFunction,
       int cutoff) :
     dim(latticeBasis.size()),
     _potentialFunction(potentialFunction) {
-    if (std::is_base_of<POWannier::IntegrationInterface, IntegrationProvider>::value == false) {
+    if (std::is_base_of<IntegrationInterface, IntegrationProvider>::value == false) {
       throw std::logic_error("IntegrationProvider template argument must implement POWannier::IntegrationInterface!");
     }
+
+    std::vector<double> basisFlattened;
     for (auto rvec : latticeBasis) {
       for (auto val : rvec) {
         basisFlattened.push_back(val);
@@ -57,19 +63,18 @@ namespace POWannier {
 
   template <class IntegrationProvider>
   template <class Function>
-  FourierCoefficients PotentialT::calculateFourierCoefficients(
+  FourierCoefficients PotentialT<IntegrationProvider>::calculateFourierCoefficients(
       Function&& potentialFunction, int cutoff) {
-    using namespace std::string_literals;
     FourierCoefficients coefficients;
     Position xmin(dim, arma::fill::zeros);
     Position xmax(dim, arma::fill::ones);
 
     for (NPoint n : nspace(cutoff, dim)) {
       arma::cx_double coefficient = chop(IntegrationProvider::integrate(
-          [this, &, n] (Position alpha) {
+          [&, n] (Position alpha) {
             Position r = alpha * _latticeBasis;
             return potentialFunction(r) * 
-                exp(0, 1i * 2 * pi * arma::dot(alpha, n));
+                std::exp(arma::cx_double(0, 2 * pi * arma::dot(alpha, n)));
           }, xmin, xmax));
 
       if (coefficient != 0.0) {
@@ -82,15 +87,18 @@ namespace POWannier {
 
 
   template <class IntegrationProvider>
-  double PotentialT::operator()(Position r) {
-    using namespace std::string_literals;
-    double result = 0;
-    for (auto coefficient : coefficients) {
+  double PotentialT<IntegrationProvider>::operator()(Position r) {
+    arma::cx_double result = 0;
+    for (auto coefficient : _potentialCoefficients) {
       NPoint n = coefficient.first;
       arma::cx_double value = coefficient.second;
       ReciprocalVector g = _reciprocalBasis * n;
-      result += coefficient * exp(-1i * arma::dot(g, r));
+      result += value * std::exp(-arma::cx_double(0, arma::dot(g, r)));
     }
-    return result;
+    return std::abs(result);
   }
+
+  using Potential = PotentialT<CubatureIntegration>;
 }
+
+#endif

@@ -26,8 +26,9 @@ class IntegrationTestClass {
       SECTION("Check if it implements IntegrationInterface") {
         REQUIRE(std::is_base_of<POWannier::IntegrationInterface, IntegrationProvider>::value == true);
       }
+
       SECTION("Calculate integral using lambda expression") {
-        std::vector<double> xmin = {0};
+        std::vector<double> xmin = {-1};
         std::vector<double> xmax = {1};
         double result = IntegrationProvider::integrate(
             [] (std::vector<double> x) {
