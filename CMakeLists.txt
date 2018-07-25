@@ -12,6 +12,27 @@ set(THIS_LIBDIR ${BASE_DIRECTORY}/lib)
 set(THIS_INCLUDEDIR ${BASE_DIRECTORY}/include)
 set(THIRD_PARTY_LIBDIR ${BASE_DIRECTORY}/third-party/lib)
 set(THIRD_PARTY_INCLUDEDIR ${BASE_DIRECTORY}/third-party/include)
+set(EXTERNAL_INSTALL_LOCATION ${BASE_DIRECTORY}/third-party)
+
+
+
+#configure_file(CMakeLists.txt.in download/CMakeLists.txt)
+
+#execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+#  RESULT_VARIABLE result
+#  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/download )
+#if(result)
+#  message(FATAL_ERROR "CMake step for googletest failed: ${result}")
+#endif()
+#execute_process(COMMAND ${CMAKE_COMMAND} --build .
+#  RESULT_VARIABLE result
+#  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/download )
+#if(result)
+#  message(FATAL_ERROR "Build step for googletest failed: ${result}")
+#endif()
+
+file(MAKE_DIRECTORY build)
+file(MAKE_DIRECTORY third-party)
 
 add_subdirectory(src/util)
 add_subdirectory(src/test)
