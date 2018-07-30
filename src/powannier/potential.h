@@ -55,7 +55,7 @@ namespace POWannier {
       }
     }
 
-    _latticeBasis = LatticeBasis(&basisFlattened.front(), dim, dim);
+    _latticeBasis = LatticeBasis(&basisFlattened.front(), dim, dim).t();
     _reciprocalBasis = 2 * pi * arma::inv(_latticeBasis);
 
     _potentialCoefficients = calculateFourierCoefficients(potentialFunction, cutoff);

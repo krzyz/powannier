@@ -27,7 +27,7 @@ namespace POWannier {
        */
       template <class Function, class Vector>
       static auto integrate(
-          Function&& function, Vector&& xmin, Vector&& xmax 
+          Function&& function, Vector xmin, Vector xmax 
         ) -> decltype(function(xmin));
   };
 }

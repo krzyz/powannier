@@ -2,8 +2,9 @@
 
 namespace POWannier {
   double chop(double number, double prec) {
-    if (abs(number) < prec)
+    if (std::abs(number) < prec) {
       number = 0;
+    }
     return number;
   }
 
@@ -18,7 +19,7 @@ namespace POWannier {
     for (int i = 0; i < numberAll; ++i) {
       int ih = i;
       NPoint n(dim);
-      for (int j = 0; j < dim; ++j) {
+      for (int j = dim-1; j >= 0; --j) {
         n(j) = ih % number1D - cutoff;
         ih /= number1D;
       }
