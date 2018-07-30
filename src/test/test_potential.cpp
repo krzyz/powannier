@@ -7,7 +7,7 @@ TEST_CASE("Check Potential class", "[potential]") {
   const double pi = POWannier::pi;
   const double sqrt2 = std::sqrt(2);
 
-  SECTION("Creating simple 1D potential") {
+  SECTION("Create simple 1D potential") {
     std::vector<POWannier::Vector> basis({ {1} });
 
     auto&& func = [=](POWannier::Position x) {
@@ -20,7 +20,7 @@ TEST_CASE("Check Potential class", "[potential]") {
     }
   }
 
-  SECTION("Creating inseparable 2D potential") {
+  SECTION("Create inseparable 2D potential") {
     std::vector<POWannier::Vector> basis({ 
         {2, -2}, 
         {0, sqrt2} });

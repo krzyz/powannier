@@ -2,7 +2,7 @@
 #include "../powannier/helpers.h"
 
 TEST_CASE("Chop function works correctly", "[helpers, chop]") {
-  SECTION("Creating simple 1D potential") {
+  SECTION("Create simple 1D potential") {
     std::vector<POWannier::NPoint> npoints = {
       {-1, -1}, {-1, 0}, {-1, 1},
       {0, -1}, {0, 0}, {0, 1},
@@ -16,7 +16,7 @@ TEST_CASE("Chop function works correctly", "[helpers, chop]") {
 }
 
 TEST_CASE("Check generation of n-dimensional uniformly distributed points with given cutoff", "[helpers, nspace]") {
-  SECTION("Creating simple 1D potential") {
+  SECTION("Create simple 1D potential") {
     std::vector<POWannier::NPoint> npoints = {
       {-1, -1}, {-1, 0}, {-1, 1},
       {0, -1}, {0, 0}, {0, 1},
