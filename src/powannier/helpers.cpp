@@ -9,7 +9,7 @@ namespace POWannier {
   }
 
   std::complex<double> chop(std::complex<double> number, double prec) {
-    return std::complex<double>(chop(std::real(number)), chop(std::imag(number)));
+    return std::complex<double>(chop(std::real(number), prec), chop(std::imag(number), prec));
   }
 
   std::vector<NPoint> nspace(int cutoff, int dim) {
