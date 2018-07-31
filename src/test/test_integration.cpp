@@ -103,6 +103,9 @@ namespace CubatureIntegrationTest {
           arma::rowvec xmax(2, arma::fill::ones);
           std::complex<double> result = IntegrationProvider::integrate(
               [=] (arma::rowvec r) {
+                  auto x = 2 * r[0];
+                  auto y = -2 * r[0] + std::sqrt(2) * r[1];
+                  auto an = -2 * r[0];
                   auto value = (std::pow(std::sin(M_PI * (x + y) / std::sqrt(2)), 2) +
                         std::pow(std::sin(0.5 * M_PI * x), 2) +
                         std::pow(std::sin(M_PI * (x + 0.25)), 2) )* 

@@ -26,7 +26,7 @@ namespace POWannier {
   class CubatureIntegration : IntegrationInterface {
     public:
       template <class Function, class Vector, typename std::enable_if_t<is_complex<typename std::result_of<Function(Vector)>::type>{}>* = nullptr>
-      static typename std::result_of<Function(Vector)>::type integrate(Function&& function, Vector xmin, Vector xmax, int level = 0) {
+      static typename std::result_of<Function(Vector)>::type integrate(Function&& function, Vector xmin, Vector xmax, double prec_rel = 1e-15, double prec_abs = 1e-15, int level = 0) {
         using namespace std::literals;
         
         int dim = checkLimits(xmin, xmax);
@@ -41,35 +41,29 @@ namespace POWannier {
             return std::imag(function(x));
         };
 
-        if (checkIfIntegrationFirstStepOk(functionReal, xmin, xmax, dim, level) == false ||
-            checkIfIntegrationFirstStepOk(functionImag, xmin, xmax, dim, level) == false) {
-          return splitIntegrate(std::ref(functionReal), xmin, xmax, dim, level) + 
-            splitIntegrate(std::ref(functionImag), xmin, xmax, dim, level)* 1i;
+        if (checkIfIntegrationFirstStepOk(functionReal, xmin, xmax, dim, prec_rel, prec_abs, level) == false ||
+            checkIfIntegrationFirstStepOk(functionImag, xmin, xmax, dim, prec_rel, prec_abs, level) == false) {
+          return splitIntegrate(std::ref(functionReal), xmin, xmax, dim, prec_rel, prec_abs, level) + 
+            splitIntegrate(std::ref(functionImag), xmin, xmax, dim, prec_rel, prec_abs, level)* 1i;
         }
 
-        pcubature_v(1, integrateForward<decltype(functionReal), Vector>, &functionReal, dim, toArray(xmin), toArray(xmax), 0, 1e-15, 1e-15, ERROR_INDIVIDUAL, &resultReal, &err);
-        if (abs(resultReal) < 1e-14) {
-          resultReal = 0;
-        }
+        pcubature_v(1, integrateForward<decltype(functionReal), Vector>, &functionReal, dim, toArray(xmin), toArray(xmax), 0, prec_rel, prec_abs, ERROR_INDIVIDUAL, &resultReal, &err);
 
-        pcubature_v(1, integrateForward<decltype(functionImag), Vector>, &functionImag, dim, toArray(xmin), toArray(xmax), 0, 1e-15, 1e-15, ERROR_INDIVIDUAL, &resultImag, &err);
-        if (abs(resultImag) < 1e-14) {
-          resultReal = 0;
-        }
+        pcubature_v(1, integrateForward<decltype(functionImag), Vector>, &functionImag, dim, toArray(xmin), toArray(xmax), 0, prec_rel, prec_abs, ERROR_INDIVIDUAL, &resultImag, &err);
 
         return resultReal + resultImag * 1i;
       }
 
       template <class Function, class Vector, typename std::enable_if_t<!is_complex<typename std::result_of<Function(Vector)>::type>{}>* = nullptr>
-      static typename std::result_of<Function(Vector)>::type integrate(Function&& function, Vector xmin, Vector xmax, int level = 0) {
+      static typename std::result_of<Function(Vector)>::type integrate(Function&& function, Vector xmin, Vector xmax, double prec_rel = 1e-15, double prec_abs = 1e-15, int level = 0) {
         int dim = checkLimits(xmin, xmax);
 
-        if (checkIfIntegrationFirstStepOk(function, xmin, xmax, dim, level) == false) {
-          return splitIntegrate(function, xmin, xmax, dim, level+1);
+        if (checkIfIntegrationFirstStepOk(function, xmin, xmax, dim, prec_rel, prec_abs, level) == false) {
+          return splitIntegrate(function, xmin, xmax, dim, prec_rel, prec_abs, level+1);
         }
 
         double result, err;
-        pcubature_v(1, integrateForward<Function, Vector>, &function, dim, toArray(xmin), toArray(xmax), 0, 1e-15, 1e-15, ERROR_INDIVIDUAL, &result, &err);
+        pcubature_v(1, integrateForward<Function, Vector>, &function, dim, toArray(xmin), toArray(xmax), 0, prec_rel, prec_abs, ERROR_INDIVIDUAL, &result, &err);
 
         return result;
       }
@@ -80,7 +74,7 @@ namespace POWannier {
       // if function value at these points is the same it just returns it times volume of (xmin, xmax) area
       // this function checks for such situation
       template <class Function, class Vector>
-      static bool checkIfIntegrationFirstStepOk(Function&& function, Vector xmin, Vector xmax, int dim, int level) {
+      static bool checkIfIntegrationFirstStepOk(Function&& function, Vector xmin, Vector xmax, int dim, double prec_rel, double prec_abs, int level) {
         if (level > 5) {
           return true;
         }
@@ -88,7 +82,7 @@ namespace POWannier {
         for (int i = 0; i < dim; ++i) {
           xmid[i] = 0.5 * (xmin[i] + xmax[i]);
         }
-        if (std::abs(function(xmin) - function(xmid)) < 1e-14 && std::abs(function(xmid) - function(xmax)) < 1e-14) {
+        if (std::abs(function(xmin) - function(xmid)) < 10*prec_abs && std::abs(function(xmid) - function(xmax)) < 10*prec_abs) {
           return false;
         } else {
           return true;
@@ -98,7 +92,7 @@ namespace POWannier {
       // this function splits integral along first dimension at point 0.5*e*(xmax[0]-xmin[0])
       // in order to get correct integral using pcubature function (see checkIfIntegrationFirstStepOk())
       template <class Function, class Vector>
-      static auto splitIntegrate(Function&& function, Vector xmin, Vector xmax, int dim, int level) {
+      static auto splitIntegrate(Function&& function, Vector xmin, Vector xmax, int dim, double prec_rel, double prec_abs, int level) {
         std::random_device r;
         std::default_random_engine e1(r());
         std::uniform_real_distribution<double> uniform_dist(0.4, 0.6);
@@ -122,7 +116,7 @@ namespace POWannier {
             }
             ih /= 2;
           }
-          integral += integrate(std::ref(function), xminh, xmaxh, level+1);
+          integral += integrate(std::ref(function), xminh, xmaxh, prec_rel, prec_abs, level+1);
         }
 
         return integral;

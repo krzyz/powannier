@@ -15,9 +15,12 @@ TEST_CASE("Check Potential class", "[potential]") {
     };
 
     POWannier::Potential V(basis, func, 1);
-    for (auto x : std::vector<double>({-0.5, 0, 0.5})) {
+
+    for (auto x : std::vector<double>({-0.2, 0, 0.2})) {
       REQUIRE(V({x}) == Approx(func({x})).margin(1e-15));
     }
+
+    REQUIRE(V.relative_error() == Approx(0).margin(1e-14));
   }
 
   SECTION("Create inseparable 2D potential") {
@@ -34,12 +37,16 @@ TEST_CASE("Check Potential class", "[potential]") {
     };
 
     POWannier::Potential V(basis, func, 2);
+
     for (auto alpha1 : arma::linspace<arma::vec>(0, 1, 10)) {
       for (auto alpha2 : arma::linspace<arma::vec>(0, 1, 10)) {
         POWannier::Position r = alpha1 * basis[0] +
                                 alpha2 * basis[1];
-        REQUIRE(V({r}) == Approx(func({r})).margin(1e-14));
+        REQUIRE(V(r) == Approx(func(r)).margin(1e-14));
       }
     }
+
+    REQUIRE(V.relative_error() == Approx(0).margin(1e-14));
   }
+
 }
