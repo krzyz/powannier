@@ -34,10 +34,13 @@ TEST_CASE("Check generation of n-dimensional grid of uniformly distributed point
       {-1, -1}, {-1, 0}, {-1, 1},
       {0, -1}, {0, 0}, {0, 1},
       {1, -1}, {1, 0}, {1, 1}};
-    std::vector<POWannier::NPoint> npointsGen = POWannier::nspace(1, 2);
+    int cutoff = 1;
+    int dim = 2;
+    std::vector<POWannier::NPoint> npointsGen = POWannier::nspace(cutoff, dim);
     REQUIRE(npoints.size() == npointsGen.size());
     for (size_t i = 0; i < npoints.size(); ++i) {
       REQUIRE(arma::all(npoints[i] == npointsGen[i]));
+      REQUIRE(POWannier::nIndex(npoints[i], cutoff) == i);
     }
   }
 }

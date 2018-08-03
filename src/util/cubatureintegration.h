@@ -89,8 +89,9 @@ namespace POWannier {
         }
       }
 
-      // this function splits integral along first dimension at point 0.5*e*(xmax[0]-xmin[0])
+      // this function splits integral into 2**dim at point (xmin[i] + (\lambda_i)*(xmax[i]-xmin[i]) )
       // in order to get correct integral using pcubature function (see checkIfIntegrationFirstStepOk())
+      // lambda_i are random numbers in [0.4, 0.6] range
       template <class Function, class Vector>
       static auto splitIntegrate(Function&& function, Vector xmin, Vector xmax, int dim, double prec_rel, double prec_abs, int level) {
         std::random_device r;

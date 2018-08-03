@@ -11,6 +11,10 @@ namespace POWannier {
   std::complex<double> chop(std::complex<double> number, double prec = 1e-15);
 
   std::vector<NPoint> nspace(int cutoff, int dim);
+  std::vector<NPoint> mspace(int N, int dim);
+
+  int nIndex(const NPoint& n, int cutoff);
+  int mIndex(const NPoint& n, int N);
 }
 
 #endif

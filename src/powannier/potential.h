@@ -25,8 +25,11 @@ namespace POWannier {
           Function&& potentialFunction,
           int cutoff, double prec = 1e-15);
 
-      double operator()(Position r);
+      double operator()(Position r) const;
       double relative_error(double prec = 1e-14);
+      const LatticeBasis& latticeBasis() const;
+      const ReciprocalBasis& reciprocalBasis() const;
+      const FourierCoefficients& fourierCoefficients() const;
 
     private:
       double _prec;
@@ -37,7 +40,7 @@ namespace POWannier {
       std::map<std::string, double> _cache;
 
       template<class Function>
-      FourierCoefficients calculateFourierCoefficients(
+      FourierCoefficients calculateFourierCoefficients (
           Function&& potentialFunction, int cutoff);
   };
 
@@ -92,9 +95,8 @@ namespace POWannier {
     return coefficients;
   }
 
-
   template <class IntegrationProvider>
-  double PotentialT<IntegrationProvider>::operator()(Position r) {
+  double PotentialT<IntegrationProvider>::operator()(Position r) const {
     arma::cx_double result = 0;
     for (auto coefficient : _potentialCoefficients) {
       NPoint n = coefficient.first;
@@ -109,7 +111,7 @@ namespace POWannier {
   template <class IntegrationProvider>
   double PotentialT<IntegrationProvider>::relative_error(double prec) {
     if (_cache.find("relative_error") != _cache.end()) {
-      return _cache["relative_error"];
+      return _cache.at("relative_error");
     } else {
       Position xmin(dim, arma::fill::zeros);
       Position xmax(dim, arma::fill::ones);
@@ -134,6 +136,20 @@ namespace POWannier {
     }
   }
 
+  template <class IntegrationProvider>
+  const LatticeBasis& PotentialT<IntegrationProvider>::latticeBasis() const {
+    return _latticeBasis;
+  }
+
+  template <class IntegrationProvider>
+  const ReciprocalBasis& PotentialT<IntegrationProvider>::reciprocalBasis() const {
+    return _reciprocalBasis;
+  }
+
+  template <class IntegrationProvider>
+  const FourierCoefficients& PotentialT<IntegrationProvider>::fourierCoefficients() const {
+    return _potentialCoefficients;
+  }
 
   using Potential = PotentialT<CubatureIntegration>;
 }
