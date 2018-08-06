@@ -1,6 +1,5 @@
 #include <catch.hpp>
 #include <vector>
-#include <iomanip>
 #include "../powannier/potential.h"
 #include "../powannier/blochsystem.h"
 #include "../powannier/aliases.h"

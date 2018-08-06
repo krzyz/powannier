@@ -4,7 +4,6 @@
 
 namespace POWannier {
   BlochSystem::BlochSystem(std::shared_ptr<const Potential> V, double kl, int cutoff, int N, double s) :
-    k(k),
     kl(kl), 
     cutoff(cutoff),
     dim(V->dim),
