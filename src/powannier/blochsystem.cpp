@@ -9,20 +9,20 @@ namespace POWannier {
     dim(V->dim),
     N(N),
     s(s),
+    ms(mspace(N, dim)),
+    ns(nspace(cutoff, dim)),
     _V(std::move(V))
      {
       _reciprocalBasis = _V->reciprocalBasis();
     }
 
   void BlochSystem::generateAll() {
-    auto ms = mspace(N, dim);
     _energies = std::vector<arma::vec>(ms.size());
     _eigenvectors = std::vector<arma::cx_mat>(ms.size());
 
     for (size_t mi = 0; mi < ms.size(); ++mi) {
       const auto& m = ms[mi];
-      ReciprocalVector k = arma::conv_to<ReciprocalVector>::from(m) * 2.0 * pi / N;
-      std::vector<NPoint> ns = nspace(cutoff, dim);
+      ReciprocalVector k = kFromM(m);
 
       arma::cx_mat hamiltonian(ns.size(), ns.size(), arma::fill::zeros);
 
@@ -76,10 +76,8 @@ namespace POWannier {
   }
 
   std::complex<double> BlochSystem::bloch(NPoint m, Position r, int band) {
-    ReciprocalVector k = arma::conv_to<ReciprocalVector>::from(m) * 2.0 * pi / N;
+    ReciprocalVector k = kFromM(m);
     std::complex<double> value = 0;
-
-    std::vector<NPoint> ns = nspace(cutoff, dim);
 
     auto& coefficients = eigenvectors(m).col(band);
 
@@ -91,5 +89,10 @@ namespace POWannier {
     value *= std::exp(std::complex<double>(0, arma::dot(k, r)));
 
     return value;
+  }
+
+
+  ReciprocalVector BlochSystem::kFromM(NPoint m) {
+    return _reciprocalBasis * m / N;
   }
 }

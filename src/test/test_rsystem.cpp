@@ -16,8 +16,11 @@ TEST_CASE("Check RSystem class") {
 
     auto V = std::make_shared<POWannier::Potential>(basis, func, 1);
 
-    auto bs = std::make_shared<POWannier::BlochSystem>(V, kl, 20, 20, 8);
+    auto bs = std::make_shared<POWannier::BlochSystem>(V, kl, 20, 8, 8);
 
-    REQUIRE_NOTHROW(POWannier::RSystem(bs));
+    POWannier::RSystem rs(bs);
+
+    POWannier::Position r({0});
+    rs.getWannier(r);
   }
 }

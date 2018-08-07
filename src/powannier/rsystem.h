@@ -4,6 +4,7 @@
 #include <armadillo>
 #include <memory>
 #include "blochsystem.h"
+#include "wannier.h"
 
 namespace POWannier {
   class RSystem {
@@ -13,10 +14,16 @@ namespace POWannier {
       const int cutoff;
 
       RSystem(std::shared_ptr<BlochSystem> bs);
-      void generateR();
+      void generateRs();
+      Wannier getWannier(Position r);
     private:
-      std::vector<arma::sp_cx_mat> _ris;
+      std::vector<arma::vec> _riEigenvalues;
+      std::vector<arma::cx_mat> _riEigenvectors;
       std::shared_ptr<BlochSystem> _bs;
+
+      void generateR1();
+      void generateSubR(arma::cx_mat eigenvalues,
+                        int innerDim);
 
       void loopThroughMN(int innerDim, auto&& func);
   };
