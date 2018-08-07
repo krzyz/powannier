@@ -14,6 +14,7 @@ namespace POWannier {
       const double s;
       std::vector<POWannier::NPoint> ms;
       std::vector<POWannier::NPoint> ns;
+      std::shared_ptr<const Potential> V;
 
       BlochSystem(std::shared_ptr<const Potential> V, double kl, int cutoff, int N, double s = 1);
       void generate(NPoint m);
@@ -25,7 +26,6 @@ namespace POWannier {
       ReciprocalVector kFromM(NPoint m);
 
     private:
-      std::shared_ptr<const Potential> _V;
       std::vector<arma::vec> _energies;
       std::vector<arma::cx_mat> _eigenvectors;
       ReciprocalBasis _reciprocalBasis;

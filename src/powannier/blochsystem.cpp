@@ -11,9 +11,9 @@ namespace POWannier {
     s(s),
     ms(mspace(N, dim)),
     ns(nspace(cutoff, dim)),
-    _V(std::move(V))
+    V(std::move(V))
      {
-      _reciprocalBasis = _V->reciprocalBasis();
+      _reciprocalBasis = this->V->reciprocalBasis();
     }
 
   void BlochSystem::generateAll() {
@@ -33,7 +33,7 @@ namespace POWannier {
 
         hamiltonian(i, i) += arma::dot(nab, nab);
 
-        for (const auto& coefficient : _V->fourierCoefficients()) {
+        for (const auto& coefficient : V->fourierCoefficients()) {
           NPoint nV = coefficient.first;
           arma::cx_double valueV = coefficient.second;
 

@@ -20,7 +20,12 @@ TEST_CASE("Check RSystem class") {
 
     POWannier::RSystem rs(bs);
 
-    POWannier::Position r({0});
-    rs.getWannier(r);
+    POWannier::NPoint n({0});
+    auto wan = rs.getWannier(n);
+
+    arma::vec xs = arma::linspace<arma::vec>(-3, 3);
+    for (auto r : xs) {
+      std::cout << r << "\t" << wan({r}) << std::endl;
+    }
   }
 }

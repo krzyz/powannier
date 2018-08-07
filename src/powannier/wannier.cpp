@@ -16,7 +16,7 @@ namespace POWannier {
       value += _coefficients[mi] * _bs->bloch(m, r);
     }
 
-    return std::real(value);
+    return std::sqrt(1.0/(_bs->N * _bs->V->elementaryCellVolume())) * std::real(value);
   }
 
 }

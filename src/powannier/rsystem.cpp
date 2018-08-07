@@ -37,7 +37,6 @@ namespace POWannier {
           arma::vec eigval;
           arma::cx_mat eigvec;
 
-          std::cout << r1dPart << std::endl;
           arma::eig_sym(eigval, eigvec, r1dPart);
 
           r1Eigenvalues.subvec(i*N, (i+1)*N - 1) = std::pow(N, dim) * std::move(eigval);
@@ -111,12 +110,20 @@ namespace POWannier {
     }
   }
 
-  Wannier RSystem::getWannier(Position r) {
+  Wannier RSystem::getWannier(NPoint n) {
     const arma::vec& r1Eigenvalues = _riEigenvalues[0];
     std::cout << r1Eigenvalues << std::endl;
     int size = r1Eigenvalues.size();
     arma::uvec inds = arma::linspace<arma::uvec>(0, size-1, size);
 
-    return Wannier(_bs, _riEigenvectors[0].col(0));
+    NPoint pos = n;
+    if (N%2 == 0) {
+      pos.for_each([&] (auto& x) {x += N/2 - 1;});
+    } else {
+      pos.for_each([&] (auto& x) {x += (N-1) / 2;});
+    }
+
+    std::cout << pos << std::endl;
+    return Wannier(_bs, _riEigenvectors[0].col(pos(0)));
   }
 }

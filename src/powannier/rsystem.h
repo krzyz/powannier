@@ -15,7 +15,7 @@ namespace POWannier {
 
       RSystem(std::shared_ptr<BlochSystem> bs);
       void generateRs();
-      Wannier getWannier(Position r);
+      Wannier getWannier(NPoint n);
     private:
       std::vector<arma::vec> _riEigenvalues;
       std::vector<arma::cx_mat> _riEigenvectors;

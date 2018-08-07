@@ -30,6 +30,7 @@ namespace POWannier {
       const LatticeBasis& latticeBasis() const;
       const ReciprocalBasis& reciprocalBasis() const;
       const FourierCoefficients& fourierCoefficients() const;
+      double elementaryCellVolume() const;
 
     private:
       double _prec;
@@ -149,6 +150,11 @@ namespace POWannier {
   template <class IntegrationProvider>
   const FourierCoefficients& PotentialT<IntegrationProvider>::fourierCoefficients() const {
     return _potentialCoefficients;
+  }
+
+  template <class IntegrationProvider>
+  double PotentialT<IntegrationProvider>::elementaryCellVolume() const {
+    return abs(arma::det(latticeBasis()));
   }
 
   using Potential = PotentialT<CubatureIntegration>;
