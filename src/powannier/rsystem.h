@@ -14,18 +14,22 @@ namespace POWannier {
       const int cutoff;
 
       RSystem(std::shared_ptr<BlochSystem> bs);
-      void generateRs();
       Wannier getWannier(NPoint n);
+      const arma::cx_mat& r1Eigenvectors();
+      const arma::vec& r1Eigenvalues();
+
     private:
-      std::vector<arma::vec> _riEigenvalues;
-      std::vector<arma::cx_mat> _riEigenvectors;
+      EigenSystem _r1EigenSystem;
       std::shared_ptr<BlochSystem> _bs;
 
-      void generateR1();
-      void generateSubR(arma::cx_mat eigenvalues,
+      void sortEigensystem(arma::vec& eigenvalues, arma::cx_mat& eigenvectors);
+      arma::uvec rearrangedIndicesR1();
+      EigenSystem generateR1();
+      EigenSystem generateSubR(arma::cx_mat eigenvalues,
                         int innerDim);
 
       void loopThroughMN(int innerDim, auto&& func);
+      //void test();
   };
 }
 
