@@ -43,6 +43,7 @@ namespace POWannier {
     if (n.n_elem != dim) {
       throw std::runtime_error("Specification of Wannier location must have the same dimension as RSystem!");
     }
+    std::cout << "getWannier for n: " << n << " and elCellPositions: " << elCellPositions << std::endl;
     NPoint pos = n;
     if (N%2 == 0) {
       pos.for_each([&] (auto& x) {x += N/2 - 1;});
@@ -62,8 +63,10 @@ namespace POWannier {
       int idim = std::pow(N, dim-1-i);
       int currentPosInCell = elCellPositions(i);
       auto nextWannierPositions = currentWannierPositions.getChild(currentPosInCell);
-      int subspaceStart = idim * bands.size() * pos(i) +
-        currentWannierPositions.descendantsNumberLeftTo(currentPosInCell);
+      int subspaceStart = idim * (bands.size() * pos(i) +
+        currentWannierPositions.descendantsNumberLeftTo(currentPosInCell));
+      std::cout << "subspaceStart = " << idim << " * ( " << bands.size() << " * " << pos(i) << 
+        " + " << currentWannierPositions.descendantsNumberLeftTo(currentPosInCell) << ") = " << subspaceStart << std::endl;
       int subspaceEnd = subspaceStart +
         idim * nextWannierPositions.descendantsNumber() - 1;
 
@@ -93,7 +96,7 @@ namespace POWannier {
       currentWannierPositions = nextWannierPositions;
     }
 
-    int wannierPosition = pos(dim-1) * bands.size() +
+    int wannierPosition = pos(dim-1) * currentWannierPositions.descendantsNumber() +
       currentWannierPositions.descendantsNumberLeftTo(elCellPositions(dim-1));
     arma::cx_mat coefficients = subspace * eigenvectors.col(wannierPosition);
 
