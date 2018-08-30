@@ -12,25 +12,6 @@ namespace POWannier {
     return std::complex<double>(chop(std::real(number), prec), chop(std::imag(number), prec));
   }
 
-/*
-  std::vector<NPoint> nspace(int cutoff, int dim) {
-    std::vector<NPoint> ret;
-    int cdim = 2 * cutoff + 1;
-    int numberAll = pow(cdim, dim);
-    for (int i = 0; i < numberAll; ++i) {
-      int ih = i;
-      NPoint n(dim);
-      for (int j = dim-1; j >= 0; --j) {
-        n(j) = ih % cdim - cutoff;
-        ih /= cdim;
-      }
-      ret.push_back(n);
-    }
-
-    return ret;
-  }
-  */
-
   std::vector<NPoint> space(int beg, int end, int dim) {
     std::vector<NPoint> ret;
     int cdim = end - beg + 1;
@@ -57,22 +38,6 @@ namespace POWannier {
     return space(0, N-1, dim);
   }
 
-
-/*
-  int nIndex(NPoint n, int cutoff) {
-    int dim = n.n_elem;
-    int ret = 0;
-    int cdim = 2 * cutoff + 1;
-    for (int j = 0; j < dim; ++j) {
-      ret *= cdim;
-      ret += n(j) + cutoff;
-    }
-
-    return ret;
-  }
-  */
-
-
   int getIndex(const NPoint& n, int beg, int end) {
     int dim = n.n_elem;
     int ret = 0;
@@ -91,6 +56,10 @@ namespace POWannier {
 
   int mIndex(const NPoint& m, int N) {
     return getIndex(m, 0, N-1);
+  }
+
+  int bmIndex(const NPoint& m, int N, int bandi) {
+    return mIndex(m, N) + bandi * std::pow(N, m.n_elem);
   }
 
 }

@@ -14,6 +14,7 @@ namespace POWannier {
     V(std::move(V))
      {
       _reciprocalBasis = this->V->reciprocalBasis();
+      generateAll();
     }
 
   void BlochSystem::generateAll() {
@@ -49,33 +50,35 @@ namespace POWannier {
       arma::vec energies;
       arma::cx_mat eigenvectors;
       arma::eig_sym(energies, eigenvectors, hamiltonian);
+      /*
+      for (auto mx : m) {
+        std::cout << mx << " ";
+      }
+
+      for (int i = 0; i < 16; ++i) {
+        std::cout << energies[i] << " ";
+      }
+      std::cout << std::endl;
+      */
 
       _energies[mi] = energies;
       _eigenvectors[mi] = eigenvectors;
     }
   }
 
-  const arma::vec& BlochSystem::energies(NPoint m) {
-    if (_energies.size() == 0) {
-      generateAll();
-    }
-
+  const arma::vec& BlochSystem::energies(NPoint m) const {
     return _energies[mIndex(m, N)];
   }
   
-  const arma::cx_mat& BlochSystem::eigenvectors(NPoint m) {
-    if (_eigenvectors.size() == 0) {
-      generateAll();
-    }
-
+  const arma::cx_mat& BlochSystem::eigenvectors(NPoint m) const {
     return _eigenvectors[mIndex(m, N)];
   }
 
-  std::complex<double> BlochSystem::blochC(NPoint m, NPoint n, int band) {
+  std::complex<double> BlochSystem::blochC(NPoint m, NPoint n, int band) const {
     return eigenvectors(m)(nIndex(n, cutoff), band);
   }
 
-  std::complex<double> BlochSystem::bloch(NPoint m, Position r, int band) {
+  std::complex<double> BlochSystem::bloch(NPoint m, Position r, int band) const {
     ReciprocalVector k = kFromM(m);
     std::complex<double> value = 0;
 
@@ -92,7 +95,7 @@ namespace POWannier {
   }
 
 
-  ReciprocalVector BlochSystem::kFromM(NPoint m) {
+  ReciprocalVector BlochSystem::kFromM(NPoint m) const {
     return _reciprocalBasis * m / N;
   }
 }

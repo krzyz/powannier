@@ -15,6 +15,7 @@ namespace POWannier {
 
   int nIndex(const NPoint& n, int cutoff);
   int mIndex(const NPoint& n, int N);
+  int bmIndex(const NPoint& m, int N, int bandi);
 }
 
 #endif

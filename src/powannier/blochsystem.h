@@ -19,11 +19,11 @@ namespace POWannier {
       BlochSystem(std::shared_ptr<const Potential> V, double kl, int cutoff, int N, double s = 1);
       void generate(NPoint m);
       void generateAll();
-      const arma::vec& energies(NPoint m);
-      const arma::cx_mat& eigenvectors(NPoint m);
-      std::complex<double> bloch(NPoint m, Position r, int band = 0);
-      std::complex<double> blochC(NPoint m, NPoint n, int band = 0);
-      ReciprocalVector kFromM(NPoint m);
+      const arma::vec& energies(NPoint m) const;
+      const arma::cx_mat& eigenvectors(NPoint m) const;
+      std::complex<double> bloch(NPoint m, Position r, int band = 0) const;
+      std::complex<double> blochC(NPoint m, NPoint n, int band = 0) const;
+      ReciprocalVector kFromM(NPoint m) const;
 
     private:
       std::vector<arma::vec> _energies;
