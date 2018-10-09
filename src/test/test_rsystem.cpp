@@ -1,6 +1,7 @@
 #include <catch.hpp>
 
 #include "../powannier/rsystem.h"
+#include "../powannier/blochhelpers.h"
 
 TEST_CASE("Check RSystem class", "[rsystem]") {
   const double pi = POWannier::pi;
@@ -9,13 +10,13 @@ TEST_CASE("Check RSystem class", "[rsystem]") {
   SECTION("Calculate rsystem for a given 1D potential") {
     double kl = pi;
 
-    std::vector<POWannier::Vector> basis({ {pi/kl} });
+    auto basis = std::vector<POWannier::Vector> { {pi/kl} };
 
     auto&& func = [=](POWannier::Position x) {
       return std::pow(std::sin(kl * x[0]), 2);
     };
 
-    auto V = std::make_shared<POWannier::Potential>(basis, func, 1);
+    auto V = POWannier::Potential(basis, func, 1);
 
     auto bs = std::make_shared<POWannier::BlochSystem>(V, kl, 20, 8, 8);
 
@@ -24,7 +25,7 @@ TEST_CASE("Check RSystem class", "[rsystem]") {
     POWannier::NPoint n({0});
     auto wan = rs.getWannier(n);
 
-    wan.drawB("wan1d", 20, POWannier::WholeLattice);
+    wan.drawB("wan1d", 20, POWannier::DrawRange::WholeLattice);
   }
 
 
@@ -41,9 +42,9 @@ TEST_CASE("Check RSystem class", "[rsystem]") {
              std::pow(std::sin(kl * y), 2);
     };
 
-    auto V = std::make_shared<POWannier::Potential>(basis, func, 1);
+    auto V = POWannier::Potential(basis, func, 1);
 
-    int N = 5;
+    auto N = 5;
 
     auto bs = std::make_shared<POWannier::BlochSystem>(V, kl, 10, N, 8);
 
@@ -53,7 +54,7 @@ TEST_CASE("Check RSystem class", "[rsystem]") {
     auto wan = rs.getWannier(n);
 
     //wan.drawB("wan2d", 100, POWannier::WholeLattice);
- }
+  }
 
   SECTION("Calculate rsystem for another 2D potential") {
     std::cout << "4 bands" << std::endl;
@@ -69,8 +70,8 @@ TEST_CASE("Check RSystem class", "[rsystem]") {
              std::pow(std::sin(kl * y), 2);
     };
 
-    auto V = std::make_shared<POWannier::Potential>(basis, func, 2);
-    REQUIRE(V->relative_error() == Approx(0).margin(1e-14));
+    auto V = POWannier::Potential(basis, func, 2);
+    REQUIRE(V.relative_error() == Approx(0).margin(1e-14));
 
     int N = 3;
 
@@ -78,13 +79,12 @@ TEST_CASE("Check RSystem class", "[rsystem]") {
 
     POWannier::RSystem rs(bs, {0,1,2,3}, {2, 2});
 
-    /*
     POWannier::NPoint n({0, 0});
     auto wan = rs.getWannier(n, {0, 0});
 
-    wan.drawB("wan2d", 100, POWannier::WholeLattice);
-    */
+    //wan.drawB("wan2d", 100, POWannier::WholeLattice);
 
+/*
     for (int a = -1; a <= 1; ++a) {
       for (int b = -1; b <= 1; ++b) {
         POWannier::NPoint n({a, b});
@@ -97,21 +97,92 @@ TEST_CASE("Check RSystem class", "[rsystem]") {
         }
       }
     }
-
-
-/*
-    arma::ivec ns = arma::linspace<arma::ivec>( -(N-1)/2, (N-1)/2, N);
-    int i = 0;
-    for (auto n1 : ns) {
-      for (auto n2 : ns) {
-        POWannier::NPoint n({n1, n2});
-        auto wan = rs.getWannier(n);
-
-        wan.drawB("wan2d" + std::to_string(i), 40, POWannier::WholeLattice);
-        ++i;
-      }
-    }
     */
+
+ }
+
+SECTION("Calculate rsystem for approximated 2D potential") {
+    double kl = pi;
+    std::vector<POWannier::Vector> basis({ 
+        {pi/kl, 0}, 
+        {0, pi/kl} });
+
+    auto&& gauss1d = [=] (double x, double mu, double sigma) {
+      return std::exp(-std::pow(x-mu,2) / (2*sigma*sigma) )/(std::sqrt(2*pi) * sigma);
+    };
+
+    auto&& gauss2d = [=] (POWannier::Position r, double mux, double muy, double sigma) {
+      auto x = r[0];
+      auto y = r[1];
+      return gauss1d(x, mux, sigma) * gauss1d(y, muy, sigma);
+    };
+
+
+    auto&& func = [&](POWannier::Position r) {
+      return -gauss2d(r, -0.25, -0.25, 0.1)
+             -gauss2d(r, -0.25, 0.25, 0.1)
+             -gauss2d(r, 0.25, 0, 0.1);
+    };
+
+    auto V = POWannier::Potential(basis, func, 2, 1e-12);
+
+    int N = 3;
+
+    auto bs = std::make_shared<POWannier::BlochSystem>(V, kl, 10, N, 40);
+
+    POWannier::RSystem rs(bs, {0,1,2}, {3});
+
+    POWannier::NPoint n({0, 0});
+    auto wan1 = rs.getWannier(n, {0, 0});
+    auto wan2 = rs.getWannier(n, {0, 1});
+    auto wan3 = rs.getWannier(n, {0, 2});
+
+    //drawBands(5, V, kl, 10, 1, "bands", 20, POWannier::DrawRange::BrillouinZone);
+
+    wan1.drawB("wan2d3-1", 100, POWannier::DrawRange::WholeLattice);
+    wan2.drawB("wan2d3-2", 100, POWannier::DrawRange::WholeLattice);
+    wan3.drawB("wan2d3-3", 100, POWannier::DrawRange::WholeLattice);
+ }
+
+SECTION("Calculate rsystem for approximated 2D potential transposed") {
+    double kl = pi;
+    std::vector<POWannier::Vector> basis({ 
+        {pi/kl, 0}, 
+        {0, pi/kl} });
+
+    auto&& gauss1d = [=] (double x, double mu, double sigma) {
+      return std::exp(-std::pow(x-mu,2) / (2*sigma*sigma) )/(std::sqrt(2*pi) * sigma);
+    };
+
+    auto&& gauss2d = [=] (POWannier::Position r, double mux, double muy, double sigma) {
+      auto x = r[1];
+      auto y = r[0];
+      return gauss1d(x, mux, sigma) * gauss1d(y, muy, sigma);
+    };
+
+
+    auto&& func = [&](POWannier::Position r) {
+      return -gauss2d(r, -0.25, -0.25, 0.1)
+             -gauss2d(r, -0.25, 0.25, 0.1)
+             -gauss2d(r, 0.25, 0, 0.1);
+    };
+
+    auto V = POWannier::Potential(basis, func, 2, 1e-12);
+
+    int N = 5;
+
+    auto bs = std::make_shared<POWannier::BlochSystem>(V, kl, 10, N, 40);
+
+    POWannier::RSystem rs(bs, {0,1,2}, {1, 1, 1});
+
+    POWannier::NPoint n({0, 0});
+    auto wan1 = rs.getWannier(n, {0, 0});
+    auto wan2 = rs.getWannier(n, {1, 0});
+    auto wan3 = rs.getWannier(n, {2, 0});
+
+    wan1.drawB("wan2d3T-1", 100, POWannier::DrawRange::WholeLattice);
+    wan2.drawB("wan2d3T-2", 100, POWannier::DrawRange::WholeLattice);
+    wan3.drawB("wan2d3T-3", 100, POWannier::DrawRange::WholeLattice);
  }
 
 
@@ -131,7 +202,7 @@ TEST_CASE("Check RSystem class", "[rsystem]") {
              std::pow(std::sin(kl * z), 2);
     };
 
-    auto V = std::make_shared<POWannier::Potential>(basis, func, 1);
+    auto V = POWannier::Potential(basis, func, 1);
 
     int N = 3;
 
@@ -163,7 +234,7 @@ TEST_CASE("Check RSystem class", "[rsystem]") {
              std::pow(std::sin(pi * (x + 0.25)), 2);
     };
 
-    auto V = std::make_shared<POWannier::Potential>(basis, func, 2);
+    auto V = POWannier::Potential(basis, func, 2);
 
     int N = 5;
 

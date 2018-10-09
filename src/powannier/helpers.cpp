@@ -1,4 +1,5 @@
 #include "helpers.h"
+#include "blochsystem.h"
 
 namespace POWannier {
   double chop(double number, double prec) {
@@ -61,5 +62,6 @@ namespace POWannier {
   int bmIndex(const NPoint& m, int N, int bandi) {
     return mIndex(m, N) + bandi * std::pow(N, m.n_elem);
   }
+
 
 }

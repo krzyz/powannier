@@ -5,24 +5,23 @@
 namespace POWannier {
   RSystem::RSystem(std::shared_ptr<BlochSystem> bs, std::vector<int> bands) : 
     N(bs->N),
-    dim(bs->dim),
+    dim(bs->dim()),
     mdim(std::pow(N, dim)),
     bmdim(std::pow(N, dim) * bands.size()),
-    cutoff(bs->cutoff),
+    cutoff(bs->cutoff()),
     bands(bands),
     _bs(std::move(bs)) {
     std::vector<int> positions(bands.size(), 1);
     _wannierPositions = WannierPositions(positions);
     _r1EigenSystem = getREigensystem(0);
-    std::cout << "r1 eigenvalues: " << std::endl << r1Eigenvalues() << std::endl;
   }
 
   RSystem::RSystem(std::shared_ptr<BlochSystem> bs, std::vector<int> bands, WannierPositions positions) : 
     N(bs->N),
-    dim(bs->dim),
+    dim(bs->dim()),
     mdim(std::pow(N, dim)),
     bmdim(std::pow(N, dim) * bands.size()),
-    cutoff(bs->cutoff),
+    cutoff(bs->cutoff()),
     bands(bands),
     _wannierPositions(positions),
     _bs(std::move(bs)) {
@@ -30,7 +29,6 @@ namespace POWannier {
       throw std::runtime_error("Number of specified positions of wannier functions must be equal to bands number!");
     }
     _r1EigenSystem = getREigensystem(0);
-    std::cout << "r1 eigenvalues: " << std::endl << r1Eigenvalues() << std::endl;
   }
 
   Wannier RSystem::getWannier(NPoint n) {
@@ -43,7 +41,6 @@ namespace POWannier {
     if (n.n_elem != dim) {
       throw std::runtime_error("Specification of Wannier location must have the same dimension as RSystem!");
     }
-    std::cout << "getWannier for n: " << n << " and elCellPositions: " << elCellPositions << std::endl;
     NPoint pos = n;
     if (N%2 == 0) {
       pos.for_each([&] (auto& x) {x += N/2 - 1;});
@@ -65,39 +62,27 @@ namespace POWannier {
       auto nextWannierPositions = currentWannierPositions.getChild(currentPosInCell);
       int subspaceStart = idim * (bands.size() * pos(i) +
         currentWannierPositions.descendantsNumberLeftTo(currentPosInCell));
-      std::cout << "subspaceStart = " << idim << " * ( " << bands.size() << " * " << pos(i) << 
-        " + " << currentWannierPositions.descendantsNumberLeftTo(currentPosInCell) << ") = " << subspaceStart << std::endl;
       int subspaceEnd = subspaceStart +
         idim * nextWannierPositions.descendantsNumber() - 1;
 
-      {
-        EigenSystem subsystemb = getSubREigensystem(i+1, subspace1);
-        std::cout << "r" << i+2 << "eigenvalues of whole space: " << std::endl;
-        std::cout << std::get<0>(subsystemb) << std::endl;
-      }
-
-
-      std::cout << "subspace eigenvalues: " << std::endl << eigenvalues.subvec(subspaceStart, subspaceEnd);
+      std::cout << "eigenvalues: " << eigenvalues << std::endl;
+      std::cout << "Chosen eigenvalues: " << eigenvalues.subvec(subspaceStart, subspaceEnd) << std::endl;
       subspace = subspace * eigenvectors.cols(subspaceStart, subspaceEnd);
-
-
-      {
-        EigenSystem subsystemb = getSubREigensystem(i, subspace);
-        std::cout << "r" << i+1 << "eigenvalues inside subspace: " << std::endl;
-        std::cout << std::get<0>(subsystemb) << std::endl;
-      }
 
       EigenSystem subsystem = getSubREigensystem(i+1, subspace);
 
       eigenvalues = std::move(std::get<0>(subsystem));
 
-      std::cout << "r" << i+2 << " eigenvalues: " << std::endl << eigenvalues;
       eigenvectors = std::move(std::get<1>(subsystem));
       currentWannierPositions = nextWannierPositions;
     }
 
     int wannierPosition = pos(dim-1) * currentWannierPositions.descendantsNumber() +
       currentWannierPositions.descendantsNumberLeftTo(elCellPositions(dim-1));
+
+    std::cout << "eigenvalues: " << eigenvalues << std::endl;
+    std::cout << "Chosen eigenvalues: " << eigenvalues(wannierPosition) << std::endl;
+
     arma::cx_mat coefficients = subspace * eigenvectors.col(wannierPosition);
 
     return Wannier(_bs, coefficients, bands);
@@ -191,8 +176,6 @@ namespace POWannier {
         int first_row = bi*N;
         for (int bj = bi; bj < bands.size(); ++bj) {
           int first_col = bj*N;
-          std::cout << first_row << " " << first_col << std::endl;
-          std::cout << arma::abs(rInnerMatrix(inner, m, bi, bj)) << std::endl;
           r1dBands.submat(first_row, first_col, arma::size(N, N)) = 
             rInnerMatrix(inner, m, bi, bj);
         }
@@ -201,9 +184,6 @@ namespace POWannier {
       arma::vec eigval;
       arma::cx_mat eigvec;
 
-      std::cout << "r1dBands: " << std::endl;
-      std::cout << arma::abs(r1dBands) << std::endl;
-
       arma::eig_sym(eigval, eigvec, r1dBands);
 
       reigval.subvec(i*submdim, arma::size(eigval)) = std::move(eigval);
@@ -211,9 +191,7 @@ namespace POWannier {
     }
 
     auto indicesInStandardBasis = transformFromInnerToBm(inner);
-    std::cout << indicesInStandardBasis << std::endl;
 
-    //reigval = reigval(indicesInStandardBasis);
     reigvec = reigvec.rows(indicesInStandardBasis);
 
     sortEigensystem(reigval, reigvec);
@@ -229,8 +207,6 @@ namespace POWannier {
       subspace.t() * 
       rEigvec * arma::diagmat(rEigval) * rEigvec.t() *
       subspace;
-
-    std::cout << subr << std::endl;
 
     arma::vec eigval;
     arma::cx_mat eigvec;
@@ -282,11 +258,11 @@ namespace POWannier {
         for (int nj = 0; nj < ns.size(); ++nj) {
           np(inner) = ns[nj](0);
 
-          double fexp = (np(inner) - n(inner)) * N + (mp(inner) - m(inner));
+          int fexp = (np(inner) - n(inner)) * N + (mp(inner) - m(inner));
           if (fexp != 0) {
             arma::cx_double phase = std::pow(-1, 1 + fexp);
             if (N%2 == 0) {
-              phase *= std::exp(std::complex<double>(0, fexp/N*pi));
+              phase *= std::exp(std::complex<double>(0, fexp*1.0/N*pi));
             }
             el += std::conj(_bs->blochC(m, n, bands[bi])) * _bs->blochC(mp, np, bands[bj]) *
               phase * std::complex<double>(0, 1.0/(2*pi*fexp));

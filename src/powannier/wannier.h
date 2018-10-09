@@ -3,12 +3,9 @@
 
 #include <memory>
 #include "blochsystem.h"
+#include "blochhelpers.h"
 
 namespace POWannier {
-  enum DrawRange {
-    WholeLattice,
-    ElementaryCell,
-  };
   class Wannier {
     public:
       const std::vector<int> bands;

@@ -1,36 +1,51 @@
 #ifndef POWANNIER_BLOCHSYSTEM_H
 #define POWANNIER_BLOCHSYSTEM_H
-#include <memory>
-#include <mutex>
-#include "potential.h"
+#include "blochspec.h"
 
 namespace POWannier { 
+
+
   class BlochSystem {
     public:
-      const double kl;
-      const int cutoff;
       const int N;
-      const int dim;
-      const double s;
       std::vector<POWannier::NPoint> ms;
-      std::vector<POWannier::NPoint> ns;
-      std::shared_ptr<const Potential> V;
 
-      BlochSystem(std::shared_ptr<const Potential> V, double kl, int cutoff, int N, double s = 1);
-      void generate(NPoint m);
-      void generateAll();
+      BlochSystem(const Potential& V, 
+        double kl, int cutoff, int N, double s = 1);
       const arma::vec& energies(NPoint m) const;
       const arma::cx_mat& eigenvectors(NPoint m) const;
       std::complex<double> bloch(NPoint m, Position r, int band = 0) const;
       std::complex<double> blochC(NPoint m, NPoint n, int band = 0) const;
       ReciprocalVector kFromM(NPoint m) const;
 
+      double kl() const {
+        return _blochSpec.kl;
+      }
+
+      int cutoff() const {
+        return _blochSpec.cutoff;
+      }
+
+      int dim() const {
+        return _blochSpec.dim;
+      }
+
+      double elementaryCellVolume() const {
+        return _elementaryCellVolume;
+      }
+
+      const LatticeBasis& latticeBasis() const {
+        return _latticeBasis;
+      }
+
     private:
+      const double _elementaryCellVolume;
+      const LatticeBasis _latticeBasis;
+      const BlochSpec _blochSpec;
       std::vector<arma::vec> _energies;
       std::vector<arma::cx_mat> _eigenvectors;
-      ReciprocalBasis _reciprocalBasis;
 
-      arma::cx_mat generateMatrix(const Potential& V, double s = 1);
+      void generateAll(const Potential& V);
   };
 }
 

@@ -3,21 +3,16 @@
 
 
 namespace POWannier {
-  BlochSystem::BlochSystem(std::shared_ptr<const Potential> V, double kl, int cutoff, int N, double s) :
-    kl(kl), 
-    cutoff(cutoff),
-    dim(V->dim),
+  BlochSystem::BlochSystem(const Potential& V, double kl, int cutoff, int N, double s) :
     N(N),
-    s(s),
-    ms(mspace(N, dim)),
-    ns(nspace(cutoff, dim)),
-    V(std::move(V))
-     {
-      _reciprocalBasis = this->V->reciprocalBasis();
-      generateAll();
+    ms(mspace(N, V.dim)),
+    _elementaryCellVolume(V.elementaryCellVolume()),
+    _latticeBasis(V.latticeBasis()),
+    _blochSpec(V, kl, cutoff, s) {
+      generateAll(V);
     }
 
-  void BlochSystem::generateAll() {
+  void BlochSystem::generateAll(const Potential& V) {
     _energies = std::vector<arma::vec>(ms.size());
     _eigenvectors = std::vector<arma::cx_mat>(ms.size());
 
@@ -25,44 +20,7 @@ namespace POWannier {
       const auto& m = ms[mi];
       ReciprocalVector k = kFromM(m);
 
-      arma::cx_mat hamiltonian(ns.size(), ns.size(), arma::fill::zeros);
-
-      for (size_t i = 0; i < ns.size(); ++i) {
-        NPoint& n = ns[i];
-
-        ReciprocalVector nab = ( k + _reciprocalBasis * n) * (1.0/kl);
-
-        hamiltonian(i, i) += arma::dot(nab, nab);
-
-        for (const auto& coefficient : V->fourierCoefficients()) {
-          NPoint nV = coefficient.first;
-          arma::cx_double valueV = coefficient.second;
-
-          NPoint np = n - nV;
-          int j = nIndex(np, cutoff);
-
-          if (j >= 0 && j < ns.size()) {
-            hamiltonian(i, j) += s * valueV;
-          }
-        }
-      }
-
-      arma::vec energies;
-      arma::cx_mat eigenvectors;
-      arma::eig_sym(energies, eigenvectors, hamiltonian);
-      /*
-      for (auto mx : m) {
-        std::cout << mx << " ";
-      }
-
-      for (int i = 0; i < 16; ++i) {
-        std::cout << energies[i] << " ";
-      }
-      std::cout << std::endl;
-      */
-
-      _energies[mi] = energies;
-      _eigenvectors[mi] = eigenvectors;
+      std::tie(_energies[mi], _eigenvectors[mi]) = _blochSpec.generate(V, k);
     }
   }
 
@@ -75,27 +33,15 @@ namespace POWannier {
   }
 
   std::complex<double> BlochSystem::blochC(NPoint m, NPoint n, int band) const {
-    return eigenvectors(m)(nIndex(n, cutoff), band);
+    return _blochSpec.blochC(eigenvectors(m), n, band);
   }
 
   std::complex<double> BlochSystem::bloch(NPoint m, Position r, int band) const {
     ReciprocalVector k = kFromM(m);
-    std::complex<double> value = 0;
-
-    auto& coefficients = eigenvectors(m).col(band);
-
-    for (size_t i = 0; i < ns.size(); ++i) {
-      ReciprocalVector g = _reciprocalBasis * ns[i];
-      value += blochC(m, ns[i], band) * std::exp(std::complex<double>(0, arma::dot(g, r)));
-    }
-
-    value *= std::exp(std::complex<double>(0, arma::dot(k, r)));
-
-    return value;
+    return _blochSpec.bloch(eigenvectors(m), k, r, band);
   }
 
-
   ReciprocalVector BlochSystem::kFromM(NPoint m) const {
-    return _reciprocalBasis * m / N;
+    return _blochSpec.reciprocalBasis * m / N;
   }
 }

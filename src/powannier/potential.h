@@ -76,8 +76,10 @@ namespace POWannier {
   FourierCoefficients PotentialT<IntegrationProvider>::calculateFourierCoefficients(
       Function&& potentialFunction, int cutoff) {
     FourierCoefficients coefficients;
-    Position xmin(dim, arma::fill::zeros);
-    Position xmax(dim, arma::fill::ones);
+    Position xmin(dim);
+    Position xmax(dim);
+    xmin.fill(-0.5);
+    xmax.fill(0.5);
 
     for (NPoint n : nspace(cutoff, dim)) {
       double i = 0;
