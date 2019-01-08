@@ -52,7 +52,6 @@ namespace POWannier {
     arma::vec eigenvalues = r1Eigenvalues();
 
     arma::cx_mat subspace(bmdim, bmdim, arma::fill::eye);
-    arma::cx_mat subspace1(bmdim, bmdim, arma::fill::eye);
 
     auto currentWannierPositions = _wannierPositions;
 
@@ -65,8 +64,6 @@ namespace POWannier {
       int subspaceEnd = subspaceStart +
         idim * nextWannierPositions.descendantsNumber() - 1;
 
-      std::cout << "eigenvalues: " << eigenvalues << std::endl;
-      std::cout << "Chosen eigenvalues: " << eigenvalues.subvec(subspaceStart, subspaceEnd) << std::endl;
       subspace = subspace * eigenvectors.cols(subspaceStart, subspaceEnd);
 
       EigenSystem subsystem = getSubREigensystem(i+1, subspace);
@@ -79,9 +76,6 @@ namespace POWannier {
 
     int wannierPosition = pos(dim-1) * currentWannierPositions.descendantsNumber() +
       currentWannierPositions.descendantsNumberLeftTo(elCellPositions(dim-1));
-
-    std::cout << "eigenvalues: " << eigenvalues << std::endl;
-    std::cout << "Chosen eigenvalues: " << eigenvalues(wannierPosition) << std::endl;
 
     arma::cx_mat coefficients = subspace * eigenvectors.col(wannierPosition);
 
@@ -168,7 +162,6 @@ namespace POWannier {
 
       NPoint m(dim);
       m(outerDims) = outerMSpace[i];
-      NPoint mp = m;
 
       arma::cx_mat r1dBands(submdim, submdim);
 

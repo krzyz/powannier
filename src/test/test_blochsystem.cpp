@@ -32,11 +32,11 @@ TEST_CASE("Check BlochSystem class", "[bloch]") {
       }
 
       arma::cx_vec bfSaved;
-      bfSaved.load("blochFunction1d_" + std::to_string(i), arma::raw_ascii);
+      bfSaved.load("src/test/testdata/blochFunction1d_" + std::to_string(i), arma::raw_ascii);
 
-      for (auto i = 0; i < bfSaved.n_elem; ++i) {
-        REQUIRE(bf(i).real() == Approx(bfSaved(i).real()).margin(1e-14));
-        REQUIRE(bf(i).imag() == Approx(bfSaved(i).imag()).margin(1e-14));
+      for (auto j = 0; j < bfSaved.n_elem; ++j) {
+        REQUIRE(bf(j).real() == Approx(bfSaved(j).real()).margin(1e-14));
+        REQUIRE(bf(j).imag() == Approx(bfSaved(j).imag()).margin(1e-14));
       }
 
       //bf.save("blochFunction1d_" + std::to_string(i), arma::raw_ascii);

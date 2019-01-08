@@ -28,4 +28,10 @@ include(CTest)
 include(Catch)
 catch_discover_tests(tests)
 
+# copy test data to build directory
+set(TEST_DATA_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testdata/)
+file(MAKE_DIRECTORY ${TEST_DATA_DIRECTORY})
+file(GLOB TEST_DATA ${CMAKE_CURRENT_SOURCE_DIR}/testdata/*)
+file(COPY ${TEST_DATA} DESTINATION ${TEST_DATA_DIRECTORY})
+
 install(TARGETS tests DESTINATION ${BASE_DIRECTORY}/bin)

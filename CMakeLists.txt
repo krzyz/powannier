@@ -4,7 +4,7 @@ set(CMAKE_CXX_STANDARD 14)
 project(POWannier)
 set(VERSION_MAJOR   0   CACHE STRING "Project major version number.")
 set(VERSION_MINOR   0   CACHE STRING "Project minor version number.")
-set(VERSION_PATCH   1   CACHE STRING "Project patch version number.")
+set(VERSION_PATCH   2   CACHE STRING "Project patch version number.")
 
 ENABLE_TESTING()
 set(BASE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
