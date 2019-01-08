@@ -5,7 +5,7 @@
 namespace POWannier {
   BlochSystem::BlochSystem(const Potential& V, double kl, int cutoff, int N, double s) :
     N(N),
-    ms(mspace(N, V.dim)),
+    ms(mspace(N, V.dim())),
     _elementaryCellVolume(V.elementaryCellVolume()),
     _latticeBasis(V.latticeBasis()),
     _blochSpec(V, kl, cutoff, s) {

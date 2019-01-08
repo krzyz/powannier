@@ -1,7 +1,7 @@
 #ifndef POWANNIER_BLOCHSPEC_H
 #define POWANNIER_BLOCHSPEC_H
 #include <tuple>
-#include "potential.h"
+#include "potentialbuilder.h"
 
 namespace POWannier {
   class BlochSpec{

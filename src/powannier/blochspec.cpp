@@ -4,7 +4,7 @@ namespace POWannier {
   BlochSpec::BlochSpec(const Potential& V, double kl, int cutoff, double s) :
     kl(kl), 
     cutoff(cutoff),
-    dim(V.dim),
+    dim(V.dim()),
     s(s),
     ns(nspace(cutoff, dim)),
     reciprocalBasis(V.reciprocalBasis()) {}

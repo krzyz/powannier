@@ -16,7 +16,8 @@ namespace POWannier {
     BrillouinZone
   };
 
-  void draw(const BlochSystem& bs, auto&& func, std::string filename, int density, Position beg, Position end) {
+  template <class Function>
+  void draw(const BlochSystem& bs, Function&& func, std::string filename, int density, Position beg, Position end) {
     arma::vec range = arma::linspace<arma::vec>(0, 1, density);
     std::ofstream outfile(filename);
     outfile.precision(14);
@@ -42,7 +43,8 @@ namespace POWannier {
     nDloop(alpha, 0);
   }
 
-  void draw(const BlochSystem& bs, auto&& func, std::string filename, int density, ReciprocalVector beg, ReciprocalVector end) {
+  template <class Function>
+  void draw(const BlochSystem& bs, Function&& func, std::string filename, int density, ReciprocalVector beg, ReciprocalVector end) {
     arma::vec range = arma::linspace<arma::vec>(0, 1, density);
     std::ofstream outfile(filename);
     outfile.precision(14);
@@ -68,7 +70,8 @@ namespace POWannier {
     nDloop(k, 0);
   }
 
-  void draw(const BlochSystem& bs, auto&& func, std::string filename, int density, DrawRange drawRange) {
+  template <class Function>
+  void draw(const BlochSystem& bs, Function&& func, std::string filename, int density, DrawRange drawRange) {
     Position beg, end;
     if (drawRange == DrawRange::WholeLattice) {
       double ibeg = -bs.N/2.0;

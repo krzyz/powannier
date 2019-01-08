@@ -1,6 +1,6 @@
 #include <catch.hpp>
 #include <vector>
-#include "../powannier/potential.h"
+#include "../powannier/potentialbuilder.h"
 #include "../powannier/blochsystem.h"
 #include "../powannier/aliases.h"
 
@@ -16,7 +16,10 @@ TEST_CASE("Check BlochSystem class", "[bloch]") {
       return std::pow(std::sin(kl * x[0]), 2);
     };
 
-    auto V = POWannier::Potential(basis, func, 1);
+    auto V = POWannier::Potential::createWithBasis(basis)
+      .evaluateFromFunction(func)
+      .setCutoff(1)
+      .complete();
 
     auto bs = POWannier::BlochSystem (V, kl, 5, 20, 8);
     auto ms = std::vector<POWannier::NPoint> {{0}, {9}};

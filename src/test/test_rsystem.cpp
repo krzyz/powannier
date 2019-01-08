@@ -16,7 +16,10 @@ TEST_CASE("Check RSystem class", "[rsystem]") {
       return std::pow(std::sin(kl * x[0]), 2);
     };
 
-    auto V = POWannier::Potential(basis, func, 1);
+    auto V = POWannier::Potential::createWithBasis(basis)
+      .evaluateFromFunction(func)
+      .setCutoff(1)
+      .complete();
 
     auto bs = std::make_shared<POWannier::BlochSystem>(V, kl, 20, 8, 8);
 
@@ -25,7 +28,6 @@ TEST_CASE("Check RSystem class", "[rsystem]") {
     POWannier::NPoint n({0});
     auto wan = rs.getWannier(n);
   }
-
 
   SECTION("Calculate rsystem for a given 2D potential") {
     double kl = pi;
@@ -40,7 +42,10 @@ TEST_CASE("Check RSystem class", "[rsystem]") {
              std::pow(std::sin(kl * y), 2);
     };
 
-    auto V = POWannier::Potential(basis, func, 1);
+    auto V = POWannier::Potential::createWithBasis(basis)
+      .evaluateFromFunction(func)
+      .setCutoff(1)
+      .complete();
 
     auto N = 5;
 
@@ -65,8 +70,10 @@ TEST_CASE("Check RSystem class", "[rsystem]") {
              std::pow(std::sin(kl * y), 2);
     };
 
-    auto V = POWannier::Potential(basis, func, 2);
-    REQUIRE(V.relative_error() == Approx(0).margin(1e-14));
+    auto V = POWannier::Potential::createWithBasis(basis)
+      .evaluateFromFunction(func)
+      .setCutoff(2)
+      .complete();
 
     int N = 3;
 
@@ -103,7 +110,12 @@ SECTION("Calculate rsystem for approximated 2D potential") {
              -gauss2d(r, 0.5*a, 0.5*std::sqrt(3)*a, 0.1);
     };
 
-    auto V = POWannier::Potential(basis, func, 3, 1e-12);
+    auto V = POWannier::Potential::createWithBasis(basis)
+      .evaluateFromFunction(func)
+      .setCutoff(3)
+      .setPrecision(1e-12)
+      .complete();
+
 
     int N = 3;
 
@@ -133,7 +145,11 @@ SECTION("Calculate rsystem for approximated 2D potential") {
              std::pow(std::sin(kl * z), 2);
     };
 
-    auto V = POWannier::Potential(basis, func, 1);
+    auto V = POWannier::Potential::createWithBasis(basis)
+      .evaluateFromFunction(func)
+      .setCutoff(1)
+      .complete();
+
 
     int N = 3;
 
