@@ -2,8 +2,8 @@
 #include "potentialbuilder.h"
 
 namespace POWannier {
-  PotentialBuilder Potential::createWithBasis(std::vector<POWannier::Vector> basis) {
-    return PotentialBuilder(basis);
+  PotentialBuilder Potential::create() {
+    return PotentialBuilder();
   }
 
   double Potential::operator()(Position r) const {

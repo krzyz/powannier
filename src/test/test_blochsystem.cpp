@@ -16,7 +16,8 @@ TEST_CASE("Check BlochSystem class", "[bloch]") {
       return std::pow(std::sin(kl * x[0]), 2);
     };
 
-    auto V = POWannier::Potential::createWithBasis(basis)
+    auto V = POWannier::Potential::create()
+      .setBasis(basis)
       .evaluateFromFunction(func)
       .setCutoff(1)
       .complete();

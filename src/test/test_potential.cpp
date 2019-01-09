@@ -7,6 +7,11 @@ TEST_CASE("Check Potential class", "[potential]") {
   const double pi = POWannier::pi;
   const double sqrt2 = std::sqrt(2);
 
+  SECTION("Should not be able to create potential without basis") {
+    auto builder = POWannier::Potential::create();
+    REQUIRE_THROWS(builder.addFourierCoefficients());
+    REQUIRE_THROWS(builder.evaluateFromFunction([](POWannier::Position x){return 0.0;}));
+  }
 
   SECTION("Create simple 1d potentials") {
     std::vector<POWannier::Vector> basis({ {1} });
@@ -15,25 +20,31 @@ TEST_CASE("Check Potential class", "[potential]") {
       return std::cos(2 * pi * x[0]);
     };
 
-    auto builder = POWannier::Potential::createWithBasis(basis);
+    auto builder = POWannier::Potential::create();
+
+    builder.setBasis(basis);
+
     std::unique_ptr<POWannier::Potential> V = nullptr;
+
+    std::vector<POWannier::NPoint> indices = {{-1}, {1}};
+    std::vector<POWannier::Complex> values = {0.5, 0.5};
 
     SECTION("by supplying all Fourier coefficients at once") {
       V = std::make_unique<POWannier::Potential>(builder
           .addFourierCoefficients()
-          .provideMultiple({{-1}, {1}}).values({0.5, 0.5})
+          .provideMultiple(indices).values(values)
           .complete()
-        );
+      );
     }
 
-
     SECTION("by supplying Fourier coefficients in parts") {
+      auto x = builder.addFourierCoefficients();
+      for (int i = 0; i < indices.size(); ++i) {
+        x.provideOne(indices[i]).value(values[i]);
+      }
       V = std::make_unique<POWannier::Potential>(builder
-          .addFourierCoefficients()
-          .provideOne({-1}).value(0.5)
-          .provideOne({1}).value(0.5)
           .complete()
-        );
+      );
     }
 
     SECTION("by supplying Fourier coefficients in parts") {
@@ -45,7 +56,6 @@ TEST_CASE("Check Potential class", "[potential]") {
           .complete()
         );
     }
-
 
     for (auto x : std::vector<double>({-0.2, 0, 0.2})) {
       REQUIRE((*V)({x}) == Approx(func({x})).margin(1e-15));
@@ -66,7 +76,8 @@ TEST_CASE("Check Potential class", "[potential]") {
              std::pow(std::sin(pi * (x + 0.25)), 2);
     };
 
-    auto V = POWannier::Potential::createWithBasis(basis)
+    auto V = POWannier::Potential::create()
+          .setBasis(basis)
           .evaluateFromFunction(func)
           .setCutoff(2)
           .requireRelativeErrorBelow(1e-14)

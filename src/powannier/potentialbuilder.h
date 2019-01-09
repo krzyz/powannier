@@ -6,7 +6,6 @@
 
 #include "potential.h"
 
-
 namespace POWannier {
   class Potential;
   class PotentialFourierBuilder;
@@ -14,14 +13,15 @@ namespace POWannier {
 
   class PotentialBuilder {
     public:
-      PotentialBuilder(std::vector<POWannier::Vector> basis);
+      PotentialBuilder();
 
+      PotentialBuilder& setBasis(std::vector<POWannier::Vector> basis);
       PotentialFourierBuilder addFourierCoefficients();
 
       template <class Function>
       PotentialFunctionBuilder evaluateFromFunction(Function&& func);
       
-      Potential complete();
+      Potential&& complete();
 
     protected:
       Potential& _potential;
@@ -29,7 +29,15 @@ namespace POWannier {
         _potential(potential) {}
 
     private:
+      enum class State {
+        BasisNotDeclared,
+        BasisDeclared,
+      };
+
+      void ensureBasisDefined();
+
       Potential _p;
+      State _state;
   };
 
   class PotentialFourierBuilderAddition;
@@ -37,7 +45,8 @@ namespace POWannier {
   class PotentialFourierBuilder : private PotentialBuilder {
     public:
       explicit PotentialFourierBuilder(Potential& potential) :
-        PotentialBuilder(potential) {}
+        PotentialBuilder(potential) {
+      }
 
       PotentialFourierBuilderAddition provideMultiple(std::vector<NPoint> indices);
       PotentialFourierBuilderAddition provideOne(NPoint index);
@@ -79,7 +88,7 @@ namespace POWannier {
       double relativeError();
      
       template <class IntegrationProvider = CubatureIntegration>
-      Potential complete();
+      Potential&& complete();
 
 
     private:
@@ -92,6 +101,7 @@ namespace POWannier {
 
   template <class Function>
   PotentialFunctionBuilder PotentialBuilder::evaluateFromFunction(Function&& func) {
+    ensureBasisDefined();
     return PotentialFunctionBuilder(_potential, func);
   }
 
@@ -118,7 +128,7 @@ namespace POWannier {
   }
 
   template <class IntegrationProvider>
-  Potential PotentialFunctionBuilder::complete() {
+  Potential&& PotentialFunctionBuilder::complete() {
     _potential._coefficients.clear();
     Position xmin(_potential.dim());
     Position xmax(_potential.dim());
@@ -145,9 +155,8 @@ namespace POWannier {
       }
     }
 
-    return PotentialBuilder::complete();
+    return std::move(PotentialBuilder::complete());
   }
-
 }
 
 #endif

@@ -21,11 +21,10 @@ namespace POWannier {
     friend class PotentialFunctionBuilder;
 
     public:
-
       Potential(const Potential&) = default;
+      Potential(Potential&&) = default;
 
-      static PotentialBuilder 
-        createWithBasis(std::vector<POWannier::Vector> basis);
+      static PotentialBuilder create();
       double operator()(Position r) const;
       const int dim() const;
       const LatticeBasis& latticeBasis() const;

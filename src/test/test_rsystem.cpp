@@ -16,7 +16,8 @@ TEST_CASE("Check RSystem class", "[rsystem]") {
       return std::pow(std::sin(kl * x[0]), 2);
     };
 
-    auto V = POWannier::Potential::createWithBasis(basis)
+    auto V = POWannier::Potential::create()
+      .setBasis(basis)
       .evaluateFromFunction(func)
       .setCutoff(1)
       .complete();
@@ -42,7 +43,8 @@ TEST_CASE("Check RSystem class", "[rsystem]") {
              std::pow(std::sin(kl * y), 2);
     };
 
-    auto V = POWannier::Potential::createWithBasis(basis)
+    auto V = POWannier::Potential::create()
+      .setBasis(basis)
       .evaluateFromFunction(func)
       .setCutoff(1)
       .complete();
@@ -70,7 +72,8 @@ TEST_CASE("Check RSystem class", "[rsystem]") {
              std::pow(std::sin(kl * y), 2);
     };
 
-    auto V = POWannier::Potential::createWithBasis(basis)
+    auto V = POWannier::Potential::create()
+      .setBasis(basis)
       .evaluateFromFunction(func)
       .setCutoff(2)
       .complete();
@@ -110,7 +113,8 @@ SECTION("Calculate rsystem for approximated 2D potential") {
              -gauss2d(r, 0.5*a, 0.5*std::sqrt(3)*a, 0.1);
     };
 
-    auto V = POWannier::Potential::createWithBasis(basis)
+    auto V = POWannier::Potential::create()
+      .setBasis(basis)
       .evaluateFromFunction(func)
       .setCutoff(3)
       .setPrecision(1e-12)
@@ -145,7 +149,8 @@ SECTION("Calculate rsystem for approximated 2D potential") {
              std::pow(std::sin(kl * z), 2);
     };
 
-    auto V = POWannier::Potential::createWithBasis(basis)
+    auto V = POWannier::Potential::create()
+      .setBasis(basis)
       .evaluateFromFunction(func)
       .setCutoff(1)
       .complete();
