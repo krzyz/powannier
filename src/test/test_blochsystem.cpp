@@ -22,7 +22,14 @@ TEST_CASE("Check BlochSystem class", "[bloch]") {
       .setCutoff(1)
       .complete();
 
-    auto bs = POWannier::BlochSystem (V, kl, 5, 20, 8);
+    //auto bs = POWannier::BlochSystem (V, kl, 5, 20, 8);
+    auto bs = POWannier::BlochSystem::createWithPotential(V)
+      .setLaserWavelength(kl)
+      .setFourierCutoff(5)
+      .setSystemSize(20)
+      .setPotentialDepth(8)
+      .complete();
+
     auto ms = std::vector<POWannier::NPoint> {{0}, {9}};
     auto bands = std::vector<int> {0, 1};
     auto i = 0;

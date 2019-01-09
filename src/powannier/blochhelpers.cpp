@@ -3,7 +3,11 @@
 
 namespace POWannier {
   void drawBands(int numberOfBands, const Potential& V, double kl, int cutoff, double s, std::string fileName, int density, DrawRange drawRange) {
-    auto bs = BlochSystem(V, kl, cutoff, 1, s);
+    auto bs = BlochSystem::createWithPotential(V)
+      .setLaserWavelength(kl)
+      .setFourierCutoff(cutoff)
+      .setPotentialDepth(s)
+      .complete();
 
     ReciprocalVector beg, end;
     if (drawRange == DrawRange::BrillouinZone) {

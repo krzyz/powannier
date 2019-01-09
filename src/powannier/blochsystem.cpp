@@ -12,7 +12,11 @@ namespace POWannier {
       generateAll(V);
     }
 
-  void BlochSystem::generateAll(const Potential& V) {
+  BlochSystemBuilder BlochSystem::createWithPotential(const Potential& potential) {
+    return BlochSystemBuilder(potential);
+  }
+
+  void BlochSystem::generateAll(const Potential& potential) {
     _energies = std::vector<arma::vec>(ms.size());
     _eigenvectors = std::vector<arma::cx_mat>(ms.size());
 
@@ -20,7 +24,7 @@ namespace POWannier {
       const auto& m = ms[mi];
       ReciprocalVector k = kFromM(m);
 
-      std::tie(_energies[mi], _eigenvectors[mi]) = _blochSpec.generate(V, k);
+      std::tie(_energies[mi], _eigenvectors[mi]) = _blochSpec.generate(potential, k);
     }
   }
 

@@ -22,7 +22,14 @@ TEST_CASE("Check RSystem class", "[rsystem]") {
       .setCutoff(1)
       .complete();
 
-    auto bs = std::make_shared<POWannier::BlochSystem>(V, kl, 20, 8, 8);
+    auto bs = std::make_shared<POWannier::BlochSystem>(
+      POWannier::BlochSystem::createWithPotential(V)
+        .setLaserWavelength(kl)
+        .setFourierCutoff(20)
+        .setSystemSize(8)
+        .setPotentialDepth(8)
+        .complete()
+    );
 
     POWannier::RSystem rs(bs, {0});
 
@@ -51,7 +58,15 @@ TEST_CASE("Check RSystem class", "[rsystem]") {
 
     auto N = 5;
 
-    auto bs = std::make_shared<POWannier::BlochSystem>(V, kl, 10, N, 8);
+    auto bs = std::make_shared<POWannier::BlochSystem>(
+      POWannier::BlochSystem::createWithPotential(V)
+        .setLaserWavelength(kl)
+        .setFourierCutoff(10)
+        .setSystemSize(N)
+        .setPotentialDepth(8)
+        .complete()
+    );
+
 
     POWannier::RSystem rs(bs, {0});
 
@@ -80,7 +95,16 @@ TEST_CASE("Check RSystem class", "[rsystem]") {
 
     int N = 3;
 
-    auto bs = std::make_shared<POWannier::BlochSystem>(V, kl, 10, N, 40);
+    //auto bs = std::make_shared<POWannier::BlochSystem>(V, kl, 10, N, 40);
+    auto bs = std::make_shared<POWannier::BlochSystem>(
+      POWannier::BlochSystem::createWithPotential(V)
+        .setLaserWavelength(kl)
+        .setFourierCutoff(10)
+        .setSystemSize(N)
+        .setPotentialDepth(40)
+        .complete()
+    );
+
 
     POWannier::RSystem rs(bs, {0,1,2,3}, {2, 2});
 
@@ -123,7 +147,16 @@ SECTION("Calculate rsystem for approximated 2D potential") {
 
     int N = 3;
 
-    auto bs = std::make_shared<POWannier::BlochSystem>(V, kl, 5, N, 5);
+    //auto bs = std::make_shared<POWannier::BlochSystem>(V, kl, 5, N, 5);
+    auto bs = std::make_shared<POWannier::BlochSystem>(
+      POWannier::BlochSystem::createWithPotential(V)
+        .setLaserWavelength(kl)
+        .setFourierCutoff(5)
+        .setSystemSize(N)
+        .setPotentialDepth(5)
+        .complete()
+    );
+
 
     POWannier::RSystem rs(bs, {0,1,2}, {1, 1, 1});
 
@@ -158,7 +191,16 @@ SECTION("Calculate rsystem for approximated 2D potential") {
 
     int N = 3;
 
-    auto bs = std::make_shared<POWannier::BlochSystem>(V, kl, 1, N, 8);
+    //auto bs = std::make_shared<POWannier::BlochSystem>(V, kl, 1, N, 8);
+    auto bs = std::make_shared<POWannier::BlochSystem>(
+      POWannier::BlochSystem::createWithPotential(V)
+        .setLaserWavelength(kl)
+        .setFourierCutoff(1)
+        .setSystemSize(N)
+        .setPotentialDepth(8)
+        .complete()
+    );
+
 
     POWannier::RSystem rs(bs, {0});
 

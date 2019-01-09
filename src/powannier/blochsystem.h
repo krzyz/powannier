@@ -1,17 +1,17 @@
 #ifndef POWANNIER_BLOCHSYSTEM_H
 #define POWANNIER_BLOCHSYSTEM_H
+
 #include "blochspec.h"
+#include "blochsystembuilder.h"
 
 namespace POWannier { 
-
-
   class BlochSystem {
     public:
       const int N;
-      std::vector<POWannier::NPoint> ms;
+      const std::vector<POWannier::NPoint> ms;
 
-      BlochSystem(const Potential& V, 
-        double kl, int cutoff, int N, double s = 1);
+      static BlochSystemBuilder createWithPotential(const Potential& potential);
+
       const arma::vec& energies(NPoint m) const;
       const arma::cx_mat& eigenvectors(NPoint m) const;
       std::complex<double> bloch(NPoint m, Position r, int band = 0) const;
@@ -45,7 +45,11 @@ namespace POWannier {
       std::vector<arma::vec> _energies;
       std::vector<arma::cx_mat> _eigenvectors;
 
-      void generateAll(const Potential& V);
+      void generateAll(const Potential& potential);
+      BlochSystem(const Potential& potential, 
+        double kl, int cutoff, int N, double s = 1);
+
+    friend class BlochSystemBuilder;
   };
 }
 
