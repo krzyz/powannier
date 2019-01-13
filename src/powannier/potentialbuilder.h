@@ -73,10 +73,6 @@ namespace POWannier {
       template <class Function>
       explicit PotentialFunctionBuilder(Potential& potential, Function&& func) :
         PotentialBuilder(potential),
-        _cutoff(1),
-        _precision(1e-15),
-        _relErrorPrecision(1e-14),
-        _maxError(-1),
         _potentialFunction(func) {}
 
       PotentialFunctionBuilder& setCutoff(int cutoff);
@@ -93,10 +89,10 @@ namespace POWannier {
 
     private:
       std::function<double(Position)> _potentialFunction;
-      int _cutoff;
-      double _precision;
-      double _relErrorPrecision;
-      double _maxError;
+      int _cutoff = 1;
+      double _precision = 1e-15;
+      double _relErrorPrecision = 1e-14;
+      double _maxError = -1;
   };
 
   template <class Function>

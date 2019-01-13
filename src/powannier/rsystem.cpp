@@ -2,7 +2,35 @@
 #include "rsystem.h"
 #include "helpers.h"
 
+using namespace std::placeholders;
+
 namespace POWannier {
+  arma::imat RSystem::basisMs(int inner) const {
+
+    arma::uvec outerDims = arma::linspace<arma::uvec>(0, dim-1, dim);
+    outerDims.shed_row(inner);
+
+    auto ret = arma::imat(dim+1, bmdim);
+
+    int i = 0;
+
+    auto os = mspace(N, dim-1);
+    NPoint m(dim+1);
+    for (int mo = 0; mo < os.size(); ++mo) {
+      m(outerDims) = os[mo];
+      for (int bs = 0; bs < bands.size(); ++bs) {
+        m(dim) = bs;
+          for (int mi = 0; mi < N; ++mi) {
+          m(inner) = mi;
+          ret.col(i) = m;
+          ++i;
+        }
+      }
+    }
+
+    return ret;
+  }
+
   RSystem::RSystem(std::shared_ptr<BlochSystem> bs, std::vector<int> bands) : 
     N(bs->N),
     dim(bs->dim()),
@@ -10,25 +38,20 @@ namespace POWannier {
     bmdim(std::pow(N, dim) * bands.size()),
     cutoff(bs->cutoff()),
     bands(bands),
-    _bs(std::move(bs)) {
+    _bs(std::move(bs)),
+    _eigensystemCache(std::bind(&RSystem::calculateEigensystem, this, _1)),
+    _subEigensystemCache(std::bind(static_cast<Eigensystem(RSystem::*)(Ipp)>(&RSystem::calculateSubEigensystem), this, _1)),
+    _subspaceCache(std::bind(&RSystem::calculateSubspace, this, _1)) {
     std::vector<int> positions(bands.size(), 1);
     _wannierPositions = WannierPositions(positions);
-    _r1EigenSystem = getREigensystem(0);
   }
 
   RSystem::RSystem(std::shared_ptr<BlochSystem> bs, std::vector<int> bands, WannierPositions positions) : 
-    N(bs->N),
-    dim(bs->dim()),
-    mdim(std::pow(N, dim)),
-    bmdim(std::pow(N, dim) * bands.size()),
-    cutoff(bs->cutoff()),
-    bands(bands),
-    _wannierPositions(positions),
-    _bs(std::move(bs)) {
+    RSystem(bs, bands) {
     if (_wannierPositions.descendantsNumber() != bands.size()) {
       throw std::runtime_error("Number of specified positions of wannier functions must be equal to bands number!");
     }
-    _r1EigenSystem = getREigensystem(0);
+    _wannierPositions = positions;
   }
 
   Wannier RSystem::getWannier(NPoint n) {
@@ -36,57 +59,155 @@ namespace POWannier {
     return getWannier(n, elCellPositions);
   }
 
+  Wannier RSystem::getWannier(NPoint cellLocation, NPoint wanLocation) {
+    auto subspace = getSubspace(dim-1, cellLocation, wanLocation);
+    auto subEigenvectors = getSubEigenvectors(dim-1, cellLocation, wanLocation);
 
-  Wannier RSystem::getWannier(NPoint n, NPoint elCellPositions) {
-    if (n.n_elem != dim) {
-      throw std::runtime_error("Specification of Wannier location must have the same dimension as RSystem!");
-    }
-    NPoint pos = n;
+    int position = wannierPosition(dim-1, cellLocation, wanLocation);
+
+    arma::cx_mat coefficients = subspace * subEigenvectors.col(position);
+
+    return Wannier(_bs, coefficients, bands);
+  }
+
+  int RSystem::wannierPosition(int n, NPoint cellLocation, NPoint wanLocation) {
+    return std::get<0>(getSubspaceRange(n, cellLocation, wanLocation, true));
+  }
+
+  std::tuple<int,int> RSystem::getSubspaceRange(int n, NPoint cellLocation, NPoint wanLocation, bool last) {
+    int idim = std::pow(N, dim-n-1);
+
+    auto pos = cellLocation;
+
     if (N%2 == 0) {
       pos.for_each([&] (auto& x) {x += N/2 - 1;});
     } else {
       pos.for_each([&] (auto& x) {x += (N-1) / 2;});
     }
 
-    arma::cx_mat eigenvectors = r1Eigenvectors();
-    arma::vec eigenvalues = r1Eigenvalues();
-
-    arma::cx_mat subspace(bmdim, bmdim, arma::fill::eye);
-
-    auto currentWannierPositions = _wannierPositions;
-
-    for (int i = 0; i < dim-1; ++i) {
-      int idim = std::pow(N, dim-1-i);
-      int currentPosInCell = elCellPositions(i);
-      auto nextWannierPositions = currentWannierPositions.getChild(currentPosInCell);
-      int subspaceStart = idim * (bands.size() * pos(i) +
-        currentWannierPositions.descendantsNumberLeftTo(currentPosInCell));
-      int subspaceEnd = subspaceStart +
-        idim * nextWannierPositions.descendantsNumber() - 1;
-
-      subspace = subspace * eigenvectors.cols(subspaceStart, subspaceEnd);
-
-      EigenSystem subsystem = getSubREigensystem(i+1, subspace);
-
-      eigenvalues = std::move(std::get<0>(subsystem));
-
-      eigenvectors = std::move(std::get<1>(subsystem));
-      currentWannierPositions = nextWannierPositions;
+    auto currentPositions = _wannierPositions;
+    for (int i = 0; i < n; ++i) {
+      currentPositions = currentPositions
+        .getChild(wanLocation(i));
     }
 
-    int wannierPosition = pos(dim-1) * currentWannierPositions.descendantsNumber() +
-      currentWannierPositions.descendantsNumberLeftTo(elCellPositions(dim-1));
+    int mv = bands.size();
+    if (last == true) {
+      mv = currentPositions.descendantsNumber();
+    }
 
-    arma::cx_mat coefficients = subspace * eigenvectors.col(wannierPosition);
+    int subspaceStart = idim * (mv * pos(n)
+      + currentPositions.descendantsNumberLeftTo(wanLocation(n)));
 
-    return Wannier(_bs, coefficients, bands);
+    int subspaceEnd = subspaceStart +
+        idim * currentPositions
+          .getChild(wanLocation(n))
+          .descendantsNumber() - 1;
+
+    return std::make_tuple(subspaceStart, subspaceEnd);
+  }
+
+  const Eigensystem& RSystem::getEigensystem(int n) {
+    return _eigensystemCache.get(n);
+  }
+
+
+  const Eigensystem& RSystem::getSubEigensystem(int n, NPoint cellLocation, NPoint wanLocation) {
+    if (n == 0) {
+      return getEigensystem(0);
+    }
+
+    Ipp ipp = std::make_tuple(
+      n, 
+      arma::conv_to<std::vector<int>>::from(cellLocation.head(n)), 
+      arma::conv_to<std::vector<int>>::from(wanLocation.head(n))
+    );
+
+    return _subEigensystemCache.get(ipp);
+  }
+
+  const arma::cx_mat& RSystem::getSubspace(int n, NPoint cellLocation, NPoint wanLocation) {
+
+    Ipp ipp = std::make_tuple(
+      n, 
+      arma::conv_to<std::vector<int>>::from(cellLocation.head(n)), 
+      arma::conv_to<std::vector<int>>::from(wanLocation.head(n))
+    );
+
+    return _subspaceCache.get(ipp);
+  }
+
+  Eigensystem RSystem::calculateSubEigensystem(Ipp ipp) {
+    auto n = std::get<0>(ipp);
+    auto cellLocation = arma::conv_to<NPoint>::from(std::get<1>(ipp));
+    auto wanLocation = arma::conv_to<NPoint>::from(std::get<2>(ipp));
+
+
+    const auto& subspace = getSubspace(n, cellLocation, wanLocation);
+    return calculateSubEigensystem(n, subspace);
+  }
+
+  arma::cx_mat RSystem::calculateSubspace(Ipp ipp) {
+    auto n = std::get<0>(ipp);
+    auto cellLocation = arma::conv_to<NPoint>::from(std::get<1>(ipp));
+    auto wanLocation = arma::conv_to<NPoint>::from(std::get<2>(ipp));
+
+    if (n == 0) {
+      return arma::cx_mat(bmdim, bmdim, arma::fill::eye);
+    }
+
+    const auto& subspace = getSubspace(n-1, cellLocation, wanLocation);
+    const auto& eigenvectors = getSubEigenvectors(n-1, cellLocation, wanLocation);
+
+    auto subspaceRange = getSubspaceRange(n-1,  cellLocation, wanLocation);
+    auto subspaceStart = std::get<0>(subspaceRange);
+    auto subspaceEnd = std::get<1>(subspaceRange);
+
+    return subspace * eigenvectors.cols(subspaceStart, subspaceEnd);
+  }
+
+  arma::uvec RSystem::transformFromInner(int inner) const {
+    // in order to get the correct permutation, for each set
+    // of indices m (in the order in which they appear in Eigensystem
+    // calculations related to the "inner" dimension) to the indices m,
+    // which correspond to the same set of indices in the order in which
+    // they appear in the main basis
+    if (inner < 0 || inner > dim-1) {
+      throw std::runtime_error("Inner dimension index no in range of dimension indices!");
+    }
+
+    // the order in the last dimension is the order of the main basis
+    if (inner == dim-1) {
+      return arma::linspace<arma::uvec>(0, mdim-1, mdim);
+    }
+
+    arma::uvec indices(mdim);
+
+    for (int i = 0; i < mdim; ++i) {
+      auto m = _bs->ms[i];
+      auto mRearranged = m;
+
+      // the m indices have the form:
+      // (m_0, m_1, ... m_{inner-1}, m_{inner+1}, ... m_{dim-1}, m_{inner})
+      // while mRearranged are:
+      // (m_0, m_1, ... m_{inner-1}, m_{inner},   ... m_{dim-2}, m_{dim-1})
+      mRearranged.subvec(inner+1, dim-1) = m.subvec(inner, dim-2);
+      mRearranged(inner) = m(dim-1);
+
+      auto inew = mIndex(mRearranged, N);
+      indices(inew) = i;
+    }
+
+    return indices;
   }
 
   arma::uvec RSystem::transformToBm() const {
     int idim = N;
     int odim = std::pow(N, dim-1);
     arma::uvec indices(bmdim);
+
     int i = 0;
+
     for (int oi = 0; oi < odim; ++oi) {
       for (size_t bi = 0; bi < bands.size(); ++bi) {
         for (int ii = 0; ii < N; ++ii) {
@@ -94,28 +215,6 @@ namespace POWannier {
           ++i;
         }
       }
-    }
-    return indices;
-  }
-
-  arma::uvec RSystem::transformFromInner(int inner) const {
-    if (inner < 0 || inner > dim-1) {
-      throw std::runtime_error("Inner dimension index no in range of dimension indices!");
-    }
-    if (inner == dim-1) {
-      return arma::linspace<arma::uvec>(0, mdim-1, mdim);
-    }
-
-    arma::uvec indices(mdim);
-
-
-    for (int i = 0; i < mdim; ++i) {
-      auto m = _bs->ms[i];
-      auto mrearranged = m;
-      mrearranged.subvec(inner, dim-2) = m.subvec(inner+1, dim-1);
-      mrearranged(dim-1) = m(inner);
-      auto inew = mIndex(mrearranged, N);
-      indices(inew) = i;
     }
 
     return indices;
@@ -132,21 +231,13 @@ namespace POWannier {
     return indices;
   }
 
-  const arma::cx_mat& RSystem::r1Eigenvectors() {
-    return std::get<1>(_r1EigenSystem);
-  }
-
-  const arma::vec& RSystem::r1Eigenvalues() {
-    return std::get<0>(_r1EigenSystem);
-  }
-
   void RSystem::sortEigensystem(arma::vec& eigenvalues, arma::cx_mat& eigenvectors) const {
     arma::uvec sortedIndices = arma::sort_index(eigenvalues);
     eigenvalues = eigenvalues(sortedIndices);
     eigenvectors = eigenvectors.cols(sortedIndices);
   }
 
-  EigenSystem RSystem::getREigensystem(int inner) const {
+  Eigensystem RSystem::calculateEigensystem(int inner) const {
     int submdim = N*bands.size();
 
     auto outerMSpace = mspace(N, dim-1);
@@ -192,14 +283,16 @@ namespace POWannier {
     return make_tuple(std::move(reigval), std::move(reigvec));
   }
 
-  EigenSystem RSystem::getSubREigensystem(int inner, const arma::cx_mat& subspace) const {
-    auto rEigensystem = getREigensystem(inner);
-    const auto& rEigval = std::get<0>(rEigensystem);
-    const auto& rEigvec = std::get<1>(rEigensystem);
+  Eigensystem RSystem::calculateSubEigensystem(int inner, const arma::cx_mat& subspace) {
+    const auto& rEigval = getEigenvalues(inner);
+    const auto& rEigvec = getEigenvectors(inner);
     arma::cx_mat subr = 
       subspace.t() * 
       rEigvec * arma::diagmat(rEigval) * rEigvec.t() *
       subspace;
+
+    const auto& r0eva = getEigenvalues(0);
+    const auto& r0eve = getEigenvectors(0);
 
     arma::vec eigval;
     arma::cx_mat eigvec;
@@ -241,6 +334,7 @@ namespace POWannier {
 
     arma::cx_double el = 0;
 
+    #pragma omp parallel for reduction(compadd:el)
     for (int j = 0; j < outerNSpace.size(); ++j) {
       NPoint n(dim);
       n(outerDims) = outerNSpace[j];

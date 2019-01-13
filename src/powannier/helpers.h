@@ -7,6 +7,10 @@
 #include "aliases.h"
 
 namespace POWannier {
+  #pragma omp declare reduction \
+    (compadd:arma::cx_double:omp_out=omp_out+omp_in) \
+    initializer(omp_priv=0)
+
   double chop(double number, double prec = 1e-15);
   std::complex<double> chop(std::complex<double> number, double prec = 1e-15);
 

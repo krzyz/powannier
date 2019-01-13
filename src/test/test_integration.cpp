@@ -20,6 +20,8 @@ namespace CubatureIntegrationTest {
 
   template <class IntegrationProvider>
   class IntegrationTestClass {
+    const double pi = arma::datum::pi;
+
     public:
       IntegrationTestClass() {}
       void testMethod() {
@@ -31,8 +33,8 @@ namespace CubatureIntegrationTest {
           std::vector<double> xmin = {0};
           std::vector<double> xmax = {1};
           double result = IntegrationProvider::integrate(
-              [] (std::vector<double> x) {
-                  auto value = std::sin(2*M_PI*x[0]) * std::sin(2*M_PI*x[0]);
+              [=] (std::vector<double> x) {
+                  auto value = std::sin(2*pi*x[0]) * std::sin(2*pi*x[0]);
                   return value;
               }, xmin, xmax);
 
@@ -43,9 +45,9 @@ namespace CubatureIntegrationTest {
           std::vector<double> xmin = {0, 0};
           std::vector<double> xmax = {1, 1};
           double result = IntegrationProvider::integrate(
-              [] (std::vector<double> x) {
-                  auto value = std::pow(std::sin(2*M_PI*x[0]), 2) *
-                      std::pow(std::sin(2*M_PI*x[1]), 2);
+              [=] (std::vector<double> x) {
+                  auto value = std::pow(std::sin(2*pi*x[0]), 2) *
+                      std::pow(std::sin(2*pi*x[1]), 2);
                   return value;
                }, xmin, xmax);
 
@@ -55,7 +57,7 @@ namespace CubatureIntegrationTest {
 
         SECTION("Calculate integral using a function in a global namespace") {
           std::vector<double> xmin = {0};
-          std::vector<double> xmax = {M_PI/4};
+          std::vector<double> xmax = {pi/4};
           double result = IntegrationProvider::integrate(
               &CubatureIntegrationTest::tangent, xmin, xmax);
 
@@ -76,10 +78,10 @@ namespace CubatureIntegrationTest {
           std::vector<double> xmin = {0, 0};
           std::vector<double> xmax = {1, 1};
           double result = IntegrationProvider::integrate(
-              [] (std::vector<double> x) {
-                  auto value = std::sin(M_PI * (x[0] + x[1])) *
-                    std::sin(M_PI * (x[0] - x[1])) *
-                    std::cos(2 * M_PI * x[0]);
+              [=] (std::vector<double> x) {
+                  auto value = std::sin(pi * (x[0] + x[1])) *
+                    std::sin(pi * (x[0] - x[1])) *
+                    std::cos(2 * pi * x[0]);
                   return value;
               }, xmin, xmax);
           REQUIRE(result == Approx(-0.25));
@@ -89,9 +91,9 @@ namespace CubatureIntegrationTest {
           std::vector<double> xmin = {0};
           std::vector<double> xmax = {1};
           std::complex<double> result = IntegrationProvider::integrate(
-              [] (std::vector<double> x) {
-                  auto value = std::sin(2 * M_PI * x[0]) *
-                  std::exp(std::complex<double>(0, 2.0 * M_PI * x[0]));
+              [=] (std::vector<double> x) {
+                  auto value = std::sin(2 * pi * x[0]) *
+                  std::exp(std::complex<double>(0, 2.0 * pi * x[0]));
                   return value;
               }, xmin, xmax);
           REQUIRE(std::real(result) == Approx(0).margin(1e-15));
@@ -106,10 +108,10 @@ namespace CubatureIntegrationTest {
                   auto x = 2 * r[0];
                   auto y = -2 * r[0] + std::sqrt(2) * r[1];
                   auto an = -2 * r[0];
-                  auto value = (std::pow(std::sin(M_PI * (x + y) / std::sqrt(2)), 2) +
-                        std::pow(std::sin(0.5 * M_PI * x), 2) +
-                        std::pow(std::sin(M_PI * (x + 0.25)), 2) )* 
-                        std::exp(std::complex<double>(0, 2 * M_PI * an ));
+                  auto value = (std::pow(std::sin(pi * (x + y) / std::sqrt(2)), 2) +
+                        std::pow(std::sin(0.5 * pi * x), 2) +
+                        std::pow(std::sin(pi * (x + 0.25)), 2) )* 
+                        std::exp(std::complex<double>(0, 2 * pi * an ));
                   return value;
               }, xmin, xmax);
           REQUIRE(std::real(result) == Approx(0).margin(1e-15));

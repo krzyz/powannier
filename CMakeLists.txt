@@ -3,21 +3,22 @@ set(CMAKE_CXX_STANDARD 14)
 
 project(POWannier)
 set(VERSION_MAJOR   0   CACHE STRING "Project major version number.")
-set(VERSION_MINOR   0   CACHE STRING "Project minor version number.")
-set(VERSION_PATCH   2   CACHE STRING "Project patch version number.")
+set(VERSION_MINOR   1   CACHE STRING "Project minor version number.")
+set(VERSION_PATCH   0   CACHE STRING "Project patch version number.")
 
 ENABLE_TESTING()
-set(BASE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-set(THIS_LIBDIR ${BASE_DIRECTORY}/lib)
-set(THIS_INCLUDEDIR ${BASE_DIRECTORY}/include)
-set(THIRD_PARTY_LIBDIR ${BASE_DIRECTORY}/third-party/lib)
-set(THIRD_PARTY_INCLUDEDIR ${BASE_DIRECTORY}/third-party/include)
-set(EXTERNAL_INSTALL_LOCATION ${BASE_DIRECTORY}/third-party)
 
-list(APPEND CMAKE_MODULE_PATH ${BASE_DIRECTORY})
+set(SCRIPT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src/scripts)
 
-file(MAKE_DIRECTORY build)
-file(MAKE_DIRECTORY third-party)
+# Set and create output directories
+set(OUT_BIN_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+set(OUT_LIB_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib)
+set(OUT_INC_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include)
+file(MAKE_DIRECTORY ${OUT_BIN_DIRECTORY})
+file(MAKE_DIRECTORY ${OUT_LIB_DIRECTORY})
+file(MAKE_DIRECTORY ${OUT_INC_DIRECTORY})
+
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_subdirectory(src/util)
 add_subdirectory(src/test)

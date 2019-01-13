@@ -9,36 +9,40 @@ namespace POWannier {
   class BlochSystemBuilder {
     public:
       BlochSystemBuilder(const Potential& potential) :
-        _potential(potential),
-        _laserWavelength(1),
-        _fourierCutoff(2),
-        _systemSize(5),
-        _potentialDepth(8) {}
+        _potential(potential) {}
 
       BlochSystemBuilder& setLaserWavelength(double laserWavelength) {
         _laserWavelength = laserWavelength;
+
+        return *this;
       }
 
       BlochSystemBuilder& setFourierCutoff(int fourierCutoff) {
         _fourierCutoff = fourierCutoff;
+
+        return *this;
       }
 
       BlochSystemBuilder& setSystemSize(int systemSize) {
         _systemSize = systemSize;
+
+        return *this;
       }
 
       BlochSystemBuilder& setPotentialDepth(int potentialDepth) {
         _potentialDepth = potentialDepth;
+
+        return *this;
       }
 
       BlochSystem complete();
 
     private:
       const Potential _potential;
-      double _laserWavelength;
-      int _fourierCutoff;
-      int _systemSize;
-      int _potentialDepth;
+      double _laserWavelength = 1;
+      int _fourierCutoff = 2;
+      int _systemSize = 5;
+      int _potentialDepth = 8;
   };
 }
 

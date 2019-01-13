@@ -1,5 +1,6 @@
 #include <catch.hpp>
 #include <vector>
+#include <cmakedefines.h>
 #include "../powannier/potentialbuilder.h"
 #include "../powannier/blochsystem.h"
 #include "../powannier/aliases.h"
@@ -22,7 +23,6 @@ TEST_CASE("Check BlochSystem class", "[bloch]") {
       .setCutoff(1)
       .complete();
 
-    //auto bs = POWannier::BlochSystem (V, kl, 5, 20, 8);
     auto bs = POWannier::BlochSystem::createWithPotential(V)
       .setLaserWavelength(kl)
       .setFourierCutoff(5)
@@ -43,7 +43,7 @@ TEST_CASE("Check BlochSystem class", "[bloch]") {
       }
 
       arma::cx_vec bfSaved;
-      bfSaved.load("src/test/testdata/blochFunction1d_" + std::to_string(i), arma::raw_ascii);
+      bfSaved.load(CMakeDefines::test_data_directory + "/blochFunction1d_" + std::to_string(i), arma::raw_ascii);
 
       for (auto j = 0; j < bfSaved.n_elem; ++j) {
         REQUIRE(bf(j).real() == Approx(bfSaved(j).real()).margin(1e-14));

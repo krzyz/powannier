@@ -14,6 +14,10 @@ namespace POWannier {
               std::vector<int> bands = {0});
       double operator()(Position r);
 
+      const arma::cx_vec& coefficients() {
+        return _coefficients;
+      }
+
       void drawB(std::string filename, int density, Position beg, Position end);
       void drawB(std::string filename, int density, DrawRange drawRange);
     private:

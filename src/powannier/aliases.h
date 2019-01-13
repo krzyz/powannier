@@ -13,7 +13,7 @@ namespace POWannier {
   using LatticeBasis = arma::mat;
   using NPoint = arma::ivec;
   using FourierCoefficients = std::vector<std::pair<NPoint, Complex>>;
-  using EigenSystem = std::tuple<arma::vec, arma::cx_mat>;
+  using Eigensystem = std::tuple<arma::vec, arma::cx_mat>;
 }
 
 #endif

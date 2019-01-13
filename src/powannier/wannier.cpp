@@ -13,11 +13,10 @@ namespace POWannier {
     _coefficients(coefficients) {}
 
   double Wannier::operator()(Position r) {
-    arma::cx_double value;
-
     auto& ms = _bs->ms;
 
-    #pragma omp parallel for reduction(+:value) collapse(2)
+    arma::cx_double value = 0;
+    #pragma omp parallel for reduction(compadd:value) collapse(2)
     for (int bandsi = 0; bandsi < bands.size(); ++bandsi) {
       for (size_t mi = 0; mi < ms.size(); ++mi) {
         const auto& m = ms[mi];

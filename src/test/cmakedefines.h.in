@@ -1,0 +1,7 @@
+#cmakedefine TEST_DATA_DIRECTORY "@TEST_DATA_DIRECTORY@"
+
+#include <string>
+
+namespace CMakeDefines {
+  const std::string test_data_directory = TEST_DATA_DIRECTORY;
+}

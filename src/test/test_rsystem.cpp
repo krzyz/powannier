@@ -35,6 +35,7 @@ TEST_CASE("Check RSystem class", "[rsystem]") {
 
     POWannier::NPoint n({0});
     auto wan = rs.getWannier(n);
+    //wan.drawB("wan1d.dat", 100, POWannier::DrawRange::WholeLattice);
   }
 
   SECTION("Calculate rsystem for a given 2D potential") {
@@ -110,6 +111,25 @@ TEST_CASE("Check RSystem class", "[rsystem]") {
 
     POWannier::NPoint n({0, 0});
     auto wan = rs.getWannier(n, {0, 0});
+    /*
+    auto eigs = rs.eigenvalues(n)
+    for (auto x : eigs[0]) {
+      std::cout << x << " " << std::endl;
+    }
+    for (auto x : eigs[1]) {
+      std::cout << x << " " << std::endl;
+    }
+    */
+    //wan.drawB("wan2.dat", 50, POWannier::DrawRange::WholeLattice);
+
+
+/*
+    POWannier::RSystem rs(bs, {0,1,2,3}, {2, 2});
+
+    POWannier::NPoint n({0, 0});
+    auto wan = rs.getWannier(n, {0, 0});
+    wan.drawB("wan.dat", 50, POWannier::DrawRange::WholeLattice);
+    */
  }
 
 SECTION("Calculate rsystem for approximated 2D potential") {
@@ -195,7 +215,7 @@ SECTION("Calculate rsystem for approximated 2D potential") {
     auto bs = std::make_shared<POWannier::BlochSystem>(
       POWannier::BlochSystem::createWithPotential(V)
         .setLaserWavelength(kl)
-        .setFourierCutoff(1)
+        .setFourierCutoff(2)
         .setSystemSize(N)
         .setPotentialDepth(8)
         .complete()
@@ -207,5 +227,6 @@ SECTION("Calculate rsystem for approximated 2D potential") {
     POWannier::NPoint n({0, 0, 0});
     auto wan = rs.getWannier(n);
 
+    //wan.drawB("wan3d.dat", 40, POWannier::DrawRange::WholeLattice);
  }
 }

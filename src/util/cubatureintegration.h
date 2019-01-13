@@ -47,29 +47,32 @@ namespace POWannier {
             splitIntegrate(std::ref(functionImag), xmin, xmax, dim, prec_rel, prec_abs, level)* 1i;
         }
 
-        pcubature_v(1, integrateForward<decltype(functionReal), Vector>, &functionReal, dim, toArray(xmin), toArray(xmax), 0, prec_rel, prec_abs, ERROR_INDIVIDUAL, &resultReal, &err);
+        pcubature_v(1, reinterpret_cast<cubatureFunctionPointerType>(integrateForward<decltype(functionReal), Vector>), &functionReal, dim, toArray(xmin), toArray(xmax), 0, prec_rel, prec_abs, ERROR_INDIVIDUAL, &resultReal, &err);
 
-        pcubature_v(1, integrateForward<decltype(functionImag), Vector>, &functionImag, dim, toArray(xmin), toArray(xmax), 0, prec_rel, prec_abs, ERROR_INDIVIDUAL, &resultImag, &err);
+        pcubature_v(1, reinterpret_cast<cubatureFunctionPointerType>(integrateForward<decltype(functionImag), Vector>), &functionImag, dim, toArray(xmin), toArray(xmax), 0, prec_rel, prec_abs, ERROR_INDIVIDUAL, &resultImag, &err);
 
         return resultReal + resultImag * 1i;
       }
 
       template <class Function, class Vector, typename std::enable_if_t<!is_complex<typename std::result_of<Function(Vector)>::type>{}>* = nullptr>
       static typename std::result_of<Function(Vector)>::type integrate(Function&& function, Vector xmin, Vector xmax, double prec_rel = 1e-15, double prec_abs = 1e-15, int level = 0) {
-        int dim = checkLimits(xmin, xmax);
+      int dim = checkLimits(xmin, xmax);
 
-        if (checkIfIntegrationFirstStepOk(function, xmin, xmax, dim, prec_rel, prec_abs, level) == false) {
-          return splitIntegrate(function, xmin, xmax, dim, prec_rel, prec_abs, level+1);
-        }
+      if (checkIfIntegrationFirstStepOk(function, xmin, xmax, dim, prec_rel, prec_abs, level) == false) {
+        return splitIntegrate(function, xmin, xmax, dim, prec_rel, prec_abs, level+1);
+      }
 
-        double result, err;
-        pcubature_v(1, integrateForward<Function, Vector>, &function, dim, toArray(xmin), toArray(xmax), 0, prec_rel, prec_abs, ERROR_INDIVIDUAL, &result, &err);
+      double result, err;
+      pcubature_v(1, reinterpret_cast<cubatureFunctionPointerType>(integrateForward<decltype(function), Vector>), &function, dim, toArray(xmin), toArray(xmax), 0, prec_rel, prec_abs, ERROR_INDIVIDUAL, &result, &err);
 
-        return result;
+      return result;
       }
 
 
     private:
+      //using cubatureFunctionPointerType = int(*)(unsigned int, long long unsigned int, const double*, void*, unsigned int, double*);
+      using cubatureFunctionPointerType = integrand_v;
+
       // pcubature first evaluates function at xmin, xmax and 0.5(xmin+xmax)
       // if function value at these points is the same it just returns it times volume of (xmin, xmax) area
       // this function checks for such situation
@@ -160,13 +163,15 @@ namespace POWannier {
   template <class Function, class Vector>
   int CubatureIntegration::integrateForward(unsigned ndim, long unsigned npts, const double* xArray, void* fdata, unsigned fdim, double* fval) {
     using Base_Vector = typename std::remove_cv<typename std::remove_reference<Vector>::type>::type;
+    using Base_Function = typename std::remove_cv<typename std::remove_reference<Function>::type>::type;
 
     for (unsigned j = 0; j < npts; ++j) {
       Base_Vector x(ndim);
       for (long unsigned i = 0; i < ndim; ++i) {
         x[i] = xArray[j*ndim+i];
       }
-      fval[j] = (*reinterpret_cast<Function*&&>(fdata))(x);
+      fval[j] = (*reinterpret_cast<Base_Function*&&>(fdata))(x);
+      //fval[j] = (*reinterpret_cast<Function*&&>(fdata))(x);
     }
 
     return 0;
