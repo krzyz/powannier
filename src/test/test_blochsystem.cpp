@@ -38,14 +38,14 @@ TEST_CASE("Check BlochSystem class", "[bloch]") {
       arma::cx_vec bf(5);
       auto x = arma::linspace<arma::vec>(0, 10, bf.n_elem);
 
-      for (auto j = 0; j < bf.n_elem; ++j) {
+      for (std::size_t j = 0; j < bf.n_elem; ++j) {
         bf(j) = bs.bloch(m, {x[j]}, bands[i]);
       }
 
       arma::cx_vec bfSaved;
       bfSaved.load(CMakeDefines::test_data_directory + "/blochFunction1d_" + std::to_string(i), arma::raw_ascii);
 
-      for (auto j = 0; j < bfSaved.n_elem; ++j) {
+      for (std::size_t j = 0; j < bfSaved.n_elem; ++j) {
         REQUIRE(bf(j).real() == Approx(bfSaved(j).real()).margin(1e-14));
         REQUIRE(bf(j).imag() == Approx(bfSaved(j).imag()).margin(1e-14));
       }

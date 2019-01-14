@@ -39,7 +39,7 @@ TEST_CASE("Check Potential class", "[potential]") {
 
     SECTION("by supplying Fourier coefficients in parts") {
       auto x = builder.addFourierCoefficients();
-      for (int i = 0; i < indices.size(); ++i) {
+      for (std::size_t i = 0; i < indices.size(); ++i) {
         x.provideOne(indices[i]).value(values[i]);
       }
       V = std::make_unique<POWannier::Potential>(builder

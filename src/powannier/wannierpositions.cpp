@@ -51,7 +51,7 @@ namespace POWannier {
     if (_children.size() == 0) {
       return 0;
     }
-    if (i >= _children.size()) {
+    if (i >= static_cast<int>(_children.size())) {
       throw std::runtime_error("Attempting to reference nonexistant child!");
     }
     int value = 0;
@@ -65,7 +65,7 @@ namespace POWannier {
     if (_children.size() == 0) {
       return *this;
     }
-    if (i >= _children.size()) {
+    if (i >= static_cast<int>(_children.size())) {
       throw std::runtime_error("Attempting to reference nonexistant child!");
     }
     return _children[i];

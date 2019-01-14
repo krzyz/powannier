@@ -16,9 +16,9 @@ namespace POWannier {
 
     auto os = mspace(N, dim-1);
     NPoint m(dim+1);
-    for (int mo = 0; mo < os.size(); ++mo) {
+    for (std::size_t mo = 0; mo < os.size(); ++mo) {
       m(outerDims) = os[mo];
-      for (int bs = 0; bs < bands.size(); ++bs) {
+      for (std::size_t bs = 0; bs < bands.size(); ++bs) {
         m(dim) = bs;
           for (int mi = 0; mi < N; ++mi) {
           m(inner) = mi;
@@ -36,8 +36,8 @@ namespace POWannier {
     dim(bs->dim()),
     mdim(std::pow(N, dim)),
     bmdim(std::pow(N, dim) * bands.size()),
-    cutoff(bs->cutoff()),
     bands(bands),
+    cutoff(bs->cutoff()),
     _bs(std::move(bs)),
     _eigensystemCache(std::bind(&RSystem::calculateEigensystem, this, _1)),
     _subEigensystemCache(std::bind(static_cast<Eigensystem(RSystem::*)(Ipp)>(&RSystem::calculateSubEigensystem), this, _1)),
@@ -48,7 +48,7 @@ namespace POWannier {
 
   RSystem::RSystem(std::shared_ptr<BlochSystem> bs, std::vector<int> bands, WannierPositions positions) : 
     RSystem(bs, bands) {
-    if (_wannierPositions.descendantsNumber() != bands.size()) {
+    if (_wannierPositions.descendantsNumber() != static_cast<int>(bands.size())) {
       throw std::runtime_error("Number of specified positions of wannier functions must be equal to bands number!");
     }
     _wannierPositions = positions;
@@ -202,7 +202,6 @@ namespace POWannier {
   }
 
   arma::uvec RSystem::transformToBm() const {
-    int idim = N;
     int odim = std::pow(N, dim-1);
     arma::uvec indices(bmdim);
 
@@ -223,7 +222,7 @@ namespace POWannier {
   arma::uvec RSystem::transformFromInnerToBm(int inner) const {
     arma::uvec indices = transformToBm();
     arma::uvec indicesFromInner = transformFromInner(inner);
-    for (int i = 0; i < bands.size(); ++i) {
+    for (std::size_t i = 0; i < bands.size(); ++i) {
       arma::uvec indicesInOneBand = indices.subvec(i*mdim, (i+1) * mdim - 1);
       indices.subvec(i*mdim, (i+1) * mdim - 1) = indicesInOneBand(indicesFromInner);
     }
@@ -249,16 +248,16 @@ namespace POWannier {
     arma::vec reigval(bmdim);
     arma::cx_mat reigvec(bmdim, bmdim, arma::fill::zeros);
 
-    for (int i = 0; i < omdim; ++i) {
+    for (std::size_t i = 0; i < omdim; ++i) {
 
       NPoint m(dim);
       m(outerDims) = outerMSpace[i];
 
       arma::cx_mat r1dBands(submdim, submdim);
 
-      for (int bi = 0; bi < bands.size(); ++bi) {
+      for (std::size_t bi = 0; bi < bands.size(); ++bi) {
         int first_row = bi*N;
-        for (int bj = bi; bj < bands.size(); ++bj) {
+        for (std::size_t bj = bi; bj < bands.size(); ++bj) {
           int first_col = bj*N;
           r1dBands.submat(first_row, first_col, arma::size(N, N)) = 
             rInnerMatrix(inner, m, bi, bj);
@@ -290,9 +289,6 @@ namespace POWannier {
       subspace.t() * 
       rEigvec * arma::diagmat(rEigval) * rEigvec.t() *
       subspace;
-
-    const auto& r0eva = getEigenvalues(0);
-    const auto& r0eve = getEigenvectors(0);
 
     arma::vec eigval;
     arma::cx_mat eigvec;
@@ -335,14 +331,14 @@ namespace POWannier {
     arma::cx_double el = 0;
 
     #pragma omp parallel for reduction(compadd:el)
-    for (int j = 0; j < outerNSpace.size(); ++j) {
+    for (std::size_t j = 0; j < outerNSpace.size(); ++j) {
       NPoint n(dim);
       n(outerDims) = outerNSpace[j];
       NPoint np = n;
 
-      for (int ni = 0; ni < ns.size(); ++ni) {
+      for (std::size_t ni = 0; ni < ns.size(); ++ni) {
         n(inner) = ns[ni](0);
-        for (int nj = 0; nj < ns.size(); ++nj) {
+        for (std::size_t nj = 0; nj < ns.size(); ++nj) {
           np(inner) = ns[nj](0);
 
           int fexp = (np(inner) - n(inner)) * N + (mp(inner) - m(inner));

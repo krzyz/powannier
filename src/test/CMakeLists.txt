@@ -19,7 +19,7 @@ if(NOT catch_POPULATED)
 endif()
 
 add_executable(tests ${TEST_SOURCES})
-target_link_libraries(tests utility powannier_static Catch2::Catch2)
+target_link_libraries(tests utility powannier Catch2::Catch2)
 
 list(APPEND CMAKE_MODULE_PATH ${catch_SOURCE_DIR}/contrib)
 
@@ -38,11 +38,9 @@ file(COPY ${TEST_DATA} DESTINATION ${TEST_DATA_DIRECTORY})
 configure_file(cmakedefines.h.in cmakedefines.h)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-#if(WIN32)
-  #  target_include_directories(tests PUBLIC ${catch_SOURCE_DIR}/single_include/catch2)
-  #else()
-  #target_include_directories(tests PUBLIC ${catch_SOURCE_DIR}/include)
-  #endif(WIN32)
+if(WIN32)
+  target_include_directories(tests PUBLIC ${catch_SOURCE_DIR}/single_include/catch2)
+endif(WIN32)
 
 set_target_properties(tests
   PROPERTIES

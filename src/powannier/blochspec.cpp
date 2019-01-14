@@ -25,7 +25,7 @@ namespace POWannier {
         arma::cx_double valueV = coefficient.second;
 
         NPoint np = n - nV;
-        int j = nIndex(np, cutoff);
+        std::size_t j = nIndex(np, cutoff);
 
         if (j >= 0 && j < ns.size()) {
           hamiltonian(i, j) += s * valueV;
