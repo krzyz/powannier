@@ -20,11 +20,14 @@ namespace POWannier {
   /// @endcond
 
   /**
-   * \brief An adapter implementing IntegrationInterface using Cubature C library (https://github.com/stevengj/cubature).
+   * \brief Adapter implementing IntegrationInterface using Cubature C library (https://github.com/stevengj/cubature).
    */
 
   class CubatureIntegration : IntegrationInterface {
     public:
+      /**
+       * Implementation of IntegrationInterface::integrate() function for complex valued integrand.
+       */
       template <class Function, class Vector, typename std::enable_if_t<is_complex<typename std::result_of<Function(Vector)>::type>{}>* = nullptr>
       static typename std::result_of<Function(Vector)>::type integrate(Function&& function, Vector xmin, Vector xmax, double prec_rel = 1e-15, double prec_abs = 1e-15, int level = 0) {
         using namespace std::literals;
@@ -54,6 +57,9 @@ namespace POWannier {
         return resultReal + resultImag * 1i;
       }
 
+      /**
+       * Implementation of IntegrationInterface::integrate() function for real valued integrand.
+       */
       template <class Function, class Vector, typename std::enable_if_t<!is_complex<typename std::result_of<Function(Vector)>::type>{}>* = nullptr>
       static typename std::result_of<Function(Vector)>::type integrate(Function&& function, Vector xmin, Vector xmax, double prec_rel = 1e-15, double prec_abs = 1e-15, int level = 0) {
       int dim = checkLimits(xmin, xmax);

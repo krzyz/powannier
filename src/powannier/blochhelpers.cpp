@@ -14,7 +14,7 @@ namespace POWannier {
       beg = -pi * ReciprocalVector(bs.dim(), arma::fill::ones);
       end = pi * ReciprocalVector(bs.dim(), arma::fill::ones);
 
-      draw(bs, [&] (ReciprocalVector k) -> arma::vec {
+      draw(bs.latticeBasis(), [&] (ReciprocalVector k) -> arma::vec {
         auto bloch = Bloch(k, V, kl, cutoff, s);
         return bloch.energies().head(numberOfBands);
       }, fileName, density, beg, end);

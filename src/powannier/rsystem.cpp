@@ -5,32 +5,6 @@
 using namespace std::placeholders;
 
 namespace POWannier {
-  arma::imat RSystem::basisMs(int inner) const {
-
-    arma::uvec outerDims = arma::linspace<arma::uvec>(0, dim-1, dim);
-    outerDims.shed_row(inner);
-
-    auto ret = arma::imat(dim+1, bmdim);
-
-    int i = 0;
-
-    auto os = mspace(N, dim-1);
-    NPoint m(dim+1);
-    for (std::size_t mo = 0; mo < os.size(); ++mo) {
-      m(outerDims) = os[mo];
-      for (std::size_t bs = 0; bs < bands.size(); ++bs) {
-        m(dim) = bs;
-          for (int mi = 0; mi < N; ++mi) {
-          m(inner) = mi;
-          ret.col(i) = m;
-          ++i;
-        }
-      }
-    }
-
-    return ret;
-  }
-
   RSystem::RSystem(std::shared_ptr<BlochSystem> bs, std::vector<int> bands) : 
     N(bs->N),
     dim(bs->dim()),
@@ -48,7 +22,7 @@ namespace POWannier {
 
   RSystem::RSystem(std::shared_ptr<BlochSystem> bs, std::vector<int> bands, WannierPositions positions) : 
     RSystem(bs, bands) {
-    if (_wannierPositions.descendantsNumber() != static_cast<int>(bands.size())) {
+    if (_wannierPositions.descendantLeavesNumber() != static_cast<int>(bands.size())) {
       throw std::runtime_error("Number of specified positions of wannier functions must be equal to bands number!");
     }
     _wannierPositions = positions;
@@ -93,16 +67,16 @@ namespace POWannier {
 
     int mv = bands.size();
     if (last == true) {
-      mv = currentPositions.descendantsNumber();
+      mv = currentPositions.descendantLeavesNumber();
     }
 
     int subspaceStart = idim * (mv * pos(n)
-      + currentPositions.descendantsNumberLeftTo(wanLocation(n)));
+      + currentPositions.descendantLeavesNumberLeftTo(wanLocation(n)));
 
     int subspaceEnd = subspaceStart +
         idim * currentPositions
           .getChild(wanLocation(n))
-          .descendantsNumber() - 1;
+          .descendantLeavesNumber() - 1;
 
     return std::make_tuple(subspaceStart, subspaceEnd);
   }
@@ -166,6 +140,8 @@ namespace POWannier {
     return subspace * eigenvectors.cols(subspaceStart, subspaceEnd);
   }
 
+  // used to calculate permutations transforming bases used in calculating
+  // position operator of dimension "inner" to the main basis
   arma::uvec RSystem::transformFromInner(int inner) const {
     // in order to get the correct permutation, for each set
     // of indices m (in the order in which they appear in Eigensystem
@@ -219,6 +195,7 @@ namespace POWannier {
     return indices;
   }
 
+  // same as above, but including the bands in the aggregate basis index
   arma::uvec RSystem::transformFromInnerToBm(int inner) const {
     arma::uvec indices = transformToBm();
     arma::uvec indicesFromInner = transformFromInner(inner);
@@ -297,6 +274,11 @@ namespace POWannier {
     return std::make_tuple(std::move(eigval), std::move(eigvec));
   }
 
+  // calculate part of the block in the position operator of dimension "inner"
+  //   block corresponds to m indices (m_{i} for i = inner)
+  //   part corresponds to bands bi (row) and bj (column)
+  // m are integers that reproduce wavewectors from first brillouin zone:
+  //   k = (2 * \pi * (m - f(N)) / N, where f(n) = 
   arma::cx_mat RSystem::rInnerMatrix(int inner, NPoint m, int bi, int bj) const {
     auto mp = m;
 
@@ -321,6 +303,8 @@ namespace POWannier {
     return matrix;
   }
 
+  // summation over all fourier coefficents for indices m (row) and mp (column),
+  // and bands bands[bi] (row) and bands[bj] (column)
   arma::cx_double RSystem::sumOverNs(int inner, NPoint m, NPoint mp, int bi, int bj) const {
     auto outerNSpace = nspace(cutoff, dim-1);
     auto ns = nspace(cutoff, 1);

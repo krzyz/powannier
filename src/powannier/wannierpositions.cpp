@@ -14,11 +14,11 @@ namespace POWannier {
     }
   }
 
-  WannierPositions::WannierPositions(std::initializer_list<int> childrenNs) : 
-      WannierPositions(childrenNs.begin(), childrenNs.end()) {}
+  WannierPositions::WannierPositions(std::initializer_list<int> leafNs) : 
+      WannierPositions(leafNs.begin(), leafNs.end()) {}
 
-  WannierPositions::WannierPositions(std::vector<int> childrenNs) : 
-      WannierPositions(childrenNs.begin(), childrenNs.end()) {}
+  WannierPositions::WannierPositions(std::vector<int> leafNs) : 
+      WannierPositions(leafNs.begin(), leafNs.end()) {}
 
 
   WannierPositions::WannierPositions(
@@ -36,18 +36,18 @@ namespace POWannier {
     return _children.size();
   }
   
-  int WannierPositions::descendantsNumber() const {
+  int WannierPositions::descendantLeavesNumber() const {
     if (_children.size() == 0) {
       return 1;
     }
     int value = 0;
     for (auto child : _children) {
-      value += child.descendantsNumber();
+      value += child.descendantLeavesNumber();
     }
     return value;
   }
 
-  int WannierPositions::descendantsNumberLeftTo(int i) const{
+  int WannierPositions::descendantLeavesNumberLeftTo(int i) const{
     if (_children.size() == 0) {
       return 0;
     }
@@ -56,7 +56,7 @@ namespace POWannier {
     }
     int value = 0;
     for (int j = 0; j < i; ++j) {
-      value += _children[j].descendantsNumber();
+      value += _children[j].descendantLeavesNumber();
     }
     return value;
   }

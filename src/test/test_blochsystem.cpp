@@ -1,7 +1,7 @@
 #include <catch.hpp>
 #include <vector>
 #include <cmakedefines.h>
-#include "../powannier/potentialbuilder.h"
+#include "../powannier/builders/potentialbuilders.h"
 #include "../powannier/blochsystem.h"
 #include "../powannier/aliases.h"
 

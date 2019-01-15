@@ -5,7 +5,6 @@
 
 TEST_CASE("Check RSystem class", "[rsystem]") {
   const double pi = POWannier::pi;
-  const double sqrt2 = std::sqrt(2);
 
   SECTION("Calculate rsystem for a given 1D potential") {
     double kl = pi;
@@ -35,7 +34,7 @@ TEST_CASE("Check RSystem class", "[rsystem]") {
 
     POWannier::NPoint n({0});
     auto wan = rs.getWannier(n);
-    //wan.drawB("wan1d.dat", 100, POWannier::DrawRange::WholeLattice);
+    //wan.draw("wan1d.dat", 100, POWannier::DrawRange::WholeLattice);
   }
 
   SECTION("Calculate rsystem for a given 2D potential") {
@@ -120,7 +119,7 @@ TEST_CASE("Check RSystem class", "[rsystem]") {
       std::cout << x << " " << std::endl;
     }
     */
-    //wan.drawB("wan2.dat", 50, POWannier::DrawRange::WholeLattice);
+    //wan.draw("wan2.dat", 50, POWannier::DrawRange::WholeLattice);
 
 
 /*
@@ -128,7 +127,7 @@ TEST_CASE("Check RSystem class", "[rsystem]") {
 
     POWannier::NPoint n({0, 0});
     auto wan = rs.getWannier(n, {0, 0});
-    wan.drawB("wan.dat", 50, POWannier::DrawRange::WholeLattice);
+    wan.draw("wan.dat", 50, POWannier::DrawRange::WholeLattice);
     */
  }
 
@@ -227,6 +226,6 @@ SECTION("Calculate rsystem for approximated 2D potential") {
     POWannier::NPoint n({0, 0, 0});
     auto wan = rs.getWannier(n);
 
-    //wan.drawB("wan3d.dat", 40, POWannier::DrawRange::WholeLattice);
+    //wan.draw("wan3d.dat", 40, POWannier::DrawRange::WholeLattice);
  }
 }

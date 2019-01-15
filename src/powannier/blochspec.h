@@ -1,9 +1,10 @@
 #ifndef POWANNIER_BLOCHSPEC_H
 #define POWANNIER_BLOCHSPEC_H
 #include <tuple>
-#include "potentialbuilder.h"
+#include "builders/potentialbuilders.h"
 
 namespace POWannier {
+  /// @cond HIDDEN
   class BlochSpec{
     public:
       const double kl;
@@ -11,6 +12,7 @@ namespace POWannier {
       const int dim;
       const double s;
       const std::vector<POWannier::NPoint> ns;
+      const LatticeBasis latticeBasis;
       const ReciprocalBasis reciprocalBasis;
 
       BlochSpec(const Potential& V, 
@@ -25,6 +27,7 @@ namespace POWannier {
       std::complex<double> bloch(const arma::cx_mat& eigenvectors,
           ReciprocalVector k, Position r, int band) const;
   };
+  /// @endcond
 }
 
 #endif

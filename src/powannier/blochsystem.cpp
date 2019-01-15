@@ -7,12 +7,11 @@ namespace POWannier {
     N(N),
     ms(mspace(N, V.dim())),
     _elementaryCellVolume(V.elementaryCellVolume()),
-    _latticeBasis(V.latticeBasis()),
     _blochSpec(V, kl, cutoff, s) {
       generateAll(V);
     }
 
-  BlochSystemBuilder BlochSystem::createWithPotential(const Potential& potential) {
+  BlochSystem::BlochSystemBuilder BlochSystem::createWithPotential(const Potential& potential) {
     return BlochSystemBuilder(potential);
   }
 

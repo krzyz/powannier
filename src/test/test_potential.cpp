@@ -1,6 +1,6 @@
 #include <catch.hpp>
 #include <vector>
-#include "../powannier/potentialbuilder.h"
+#include "../powannier/builders/potentialbuilders.h"
 #include "helpers.h"
 
 TEST_CASE("Check Potential class", "[potential]") {

@@ -1,5 +1,5 @@
 #include "potential.h"
-#include "potentialbuilder.h"
+#include "builders/potentialbuilder.h"
 
 namespace POWannier {
   PotentialBuilder Potential::create() {

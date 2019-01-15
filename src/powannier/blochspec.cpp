@@ -7,6 +7,7 @@ namespace POWannier {
     dim(V.dim()),
     s(s),
     ns(nspace(cutoff, dim)),
+    latticeBasis(V.latticeBasis()),
     reciprocalBasis(V.reciprocalBasis()) {}
 
   std::tuple<arma::vec, arma::cx_mat>
