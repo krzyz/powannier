@@ -14,14 +14,14 @@ namespace POWannier {
 
     Complex temp = 0;
     for (int i = 0; i < 10; ++i) {
-      Position r;
+      Position r(_bs->dim());
       r.randn();
       temp += complexValue(r);
     }
 
-    double beta = -atan(std::imag(temp)/real(temp));
+    double beta = -atan(std::imag(temp)/std::real(temp));
 
-    _coefficients *= std::exp(Complex(0,beta));
+    _coefficients = _coefficients * std::exp(Complex(0,beta));
   }
 
   double Wannier::operator()(Position r) {
