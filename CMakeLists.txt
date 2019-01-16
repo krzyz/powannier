@@ -4,7 +4,7 @@ set(CMAKE_CXX_STANDARD 14)
 project(POWannier)
 set(VERSION_MAJOR   0   CACHE STRING "Project major version number.")
 set(VERSION_MINOR   2   CACHE STRING "Project minor version number.")
-set(VERSION_PATCH   0   CACHE STRING "Project patch version number.")
+set(VERSION_PATCH   1   CACHE STRING "Project patch version number.")
 mark_as_advanced(VERSION_MAJOR VERSION_MINOR VERSION_PATCH)
 
 if (CMAKE_COMPILER_IS_GNUCC)

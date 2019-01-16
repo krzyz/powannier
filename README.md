@@ -2,6 +2,10 @@
 
 Simple library for finding exponentially localized expressions of Wannier functions for given potential.
 
+## Documentation
+
+The documentation of the project can be found [here](https://krzyz.github.io/powannier/).
+
 ## Prerequisites
 
 * C++ compiler supporting C++14 standard.
