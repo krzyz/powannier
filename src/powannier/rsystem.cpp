@@ -28,12 +28,12 @@ namespace POWannier {
     _wannierPositions = positions;
   }
 
-  Wannier RSystem::getWannier(NPoint n) {
+  std::unique_ptr<POWannier> RSystem::getWannier(NPoint n) {
     NPoint elCellPositions(dim, arma::fill::zeros);
     return getWannier(n, elCellPositions);
   }
 
-  Wannier RSystem::getWannier(NPoint cellLocation, NPoint wanLocation) {
+  std::unique_ptr<POWannier> RSystem::getWannier(NPoint cellLocation, NPoint wanLocation) {
     auto subspace = getSubspace(dim-1, cellLocation, wanLocation);
     auto subEigenvectors = getSubEigenvectors(dim-1, cellLocation, wanLocation);
 
@@ -41,7 +41,7 @@ namespace POWannier {
 
     arma::cx_mat coefficients = subspace * subEigenvectors.col(position);
 
-    return Wannier(_bs, coefficients, bands);
+    return std::make_unique<POWannier>(_bs, coefficients, bands);
   }
 
   int RSystem::wannierPosition(int n, NPoint cellLocation, NPoint wanLocation) {

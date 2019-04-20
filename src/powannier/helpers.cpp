@@ -63,5 +63,14 @@ namespace POWannier {
     return mIndex(m, N) + bandi * std::pow(N, m.n_elem);
   }
 
+  vector<int> commonBands(const Wannier& wan1, const Wannier& wan2) {
+    auto bands1 = wan1.bands();
+    auto bands2 = wan2.bands();
+    std::vector<int> bands;
 
+    std::set_intersection(bands1.begin(), bands1.end(),
+                          bands2.begin(), bands2.end(),
+                          std::back_inserter(bands));
+
+    return bands;
 }

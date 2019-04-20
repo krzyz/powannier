@@ -114,6 +114,8 @@ namespace POWannier {
    *   function storage.
    */
   int bmIndex(const NPoint& m, int N, int band);
+
+  std::vector<int> commonBands(Wannier& wan1, Wannier& wan2);
 }
 
 #endif

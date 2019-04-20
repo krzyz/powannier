@@ -52,6 +52,8 @@ int main() {
     wan2 = rs.getWannier({0, 0}, {1, 0});
   }
 
+  POWannier::interaction(wan1, wan1, wan1, wan1);
+
   Position beg = {-1, -1};
   Position end = {1, 1};
   wan1.draw("wan1.dat", 100, beg, end);

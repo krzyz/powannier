@@ -214,7 +214,7 @@ namespace POWannier {
        *   %Wannier function \f$ W_{\vec{R}}(\vec{r}) \f$, where \f$ \vec{R} \f$
        *   corresponds to a given $@ cellLocation.
        */
-      Wannier getWannier(NPoint cellLocation);
+      std::unique_ptr<POWannier> getWannier(NPoint cellLocation);
 
       /**
        * @brief Construct a %Wannier function at a given call (general case)
@@ -230,7 +230,7 @@ namespace POWannier {
        *   %Wannier function \f$ W_{\vec{R}}(\vec{r}) \f$, where \f$ \vec{R} \f$
        *   corresponds to a given @p cellLocation.
        */
-      Wannier getWannier(NPoint cellLocation, NPoint wanLocation);
+      std::unique_ptr<POWannier> getWannier(NPoint cellLocation, NPoint wanLocation);
 
       /**
        * @brief Get the eigensystem of \f$\hat{\lambda_n}\f$.
