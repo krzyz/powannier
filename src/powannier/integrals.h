@@ -21,8 +21,8 @@ namespace POWannier {
       int j = std::get<3>(twoWanniersWithQ);
       int qi = std::get<4>(twoWanniersWithQ);
       
-      auto& ms1 = wan1._bs->ms;
-      auto& ms2 = wan2._bs->ms;
+      auto& ms1 = wan1.ms();
+      auto& ms2 = wan2.ms();
 
       int N = wan1.N();
 
@@ -63,7 +63,7 @@ namespace POWannier {
 
       complex<double> value = 0;
 
-      int qs = 2 * wan1di.N() * (wan1di._bs.cutoff() + 0.5) - 1;
+      int qs = 2 * wan1di.N() * (wan1di.cutoff() + 0.5) - 1;
 
       for (int q1d = -qs; q1d <= qs; ++q1d) {
 
@@ -136,7 +136,7 @@ namespace POWannier {
   static double tunneling(const Wannier& wan1, const Wannier& wan2, NPoint l) {
     // ensureCompatible(wan1, wan2);
 
-    auto& ms = wan1._bs->ms;
+    auto& ms = wan1.ms();
 
     arma::cx_double value = 0;
 
@@ -148,7 +148,7 @@ namespace POWannier {
       for (std::size_t mi = 0; mi < ms.size(); ++mi) {
         const auto& m = ms[mi];
         arma::cx_double el = conj(wan1.coefficient(mi, band1i)) * wan2.coefficient(mi, band2i);
-        el *= wan1._bs->energies(m)[band] * std::exp(std::complex<double>(0, -2 * arma::dot(l, m) * pi / wan1.N()));
+        el *= wan1.energies(m)[band] * std::exp(std::complex<double>(0, -2 * arma::dot(l, m) * pi / wan1.N()));
         value += el;
       }
     }
